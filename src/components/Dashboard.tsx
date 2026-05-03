@@ -20,7 +20,7 @@ export function Dashboard() {
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-muted">Loading analytics...</p>;
+  if (loading) return <p className="text-muted" style={{padding: '2rem', textAlign: 'center'}}>Loading analytics...</p>;
 
   return (
     <div>
@@ -43,17 +43,18 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-        <div className="card">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+        <div className="glass" style={{padding: '1.5rem'}}>
           <h2>Bodyweight Trend</h2>
           {bodyweight.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={bodyweight}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="date" tickFormatter={(d) => new Date(d).toLocaleDateString()} stroke="var(--text-muted)" tick={{ fontSize: 12 }} />
-                <YAxis stroke="var(--text-muted)" tick={{ fontSize: 12 }} />
-                <Tooltip labelFormatter={(l) => new Date(l).toLocaleDateString()} contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)' }} />
-                <Line type="monotone" dataKey="bodyweight" stroke="var(--primary)" strokeWidth={2} dot={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--glass-border)" />
+                <XAxis dataKey="date" tickFormatter={(d) => new Date(d).toLocaleDateString()} stroke="var(--text-muted)" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
+                <YAxis stroke="var(--text-muted)" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
+                <Tooltip labelFormatter={(l) => new Date(l).toLocaleDateString()} contentStyle={{ background: 'rgba(5, 46, 22, 0.9)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)' }} />
+                <Line type="monotone" dataKey="bodyweight" stroke="var(--green-500)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="sma_7" stroke="var(--emerald-400)" strokeWidth={2} dot={false} strokeDasharray="5 5" />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -61,10 +62,10 @@ export function Dashboard() {
           )}
         </div>
 
-        <div className="card">
+        <div className="glass" style={{padding: '1.5rem'}}>
           <h2>Progression</h2>
           {progression.length > 0 ? (
-            <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
+            <div className="table-container" style={{ maxHeight: '300px', overflowY: 'auto' }}>
               <table>
                 <thead>
                   <tr>

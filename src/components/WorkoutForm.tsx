@@ -93,15 +93,15 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
   }
 
   if (exercises.length === 0) {
-    return <p className="text-muted">Add exercises first before logging workouts.</p>;
+    return <p className="text-muted" style={{padding: '2rem', textAlign: 'center'}}>Add exercises first before logging workouts.</p>;
   }
 
   return (
-    <div className="card">
+    <div className="glass" style={{padding: '1.5rem', marginBottom: '1.5rem'}}>
       <h2>{isEditing ? 'Edit Workout' : 'Log Workout'}</h2>
-      {error && <p style={{ color: 'var(--danger)', marginBottom: '1rem' }}>{error}</p>}
+      {error && <p style={{ color: 'var(--green-400)', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>}
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
           <div className="form-group">
             <label>Bodyweight (kg)</label>
             <input type="number" step="0.1" value={bodyweight} onChange={(e) => setBodyweight(e.target.value)} placeholder="Optional" />
@@ -112,9 +112,9 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
           </div>
         </div>
 
-        <h3 style={{ margin: '1rem 0 0.5rem' }}>Sets</h3>
+        <h3 style={{ margin: '1rem 0 0.75rem' }}>Sets</h3>
         {sets.map((set, i) => (
-          <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.5rem', marginBottom: '0.75rem', alignItems: 'end' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label>Exercise</label>
               <select value={set.exercise_id} onChange={(e) => updateSet(i, 'exercise_id', parseInt(e.target.value))} required>
@@ -140,12 +140,12 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
               <label>Notes</label>
               <input type="text" value={set.notes} onChange={(e) => updateSet(i, 'notes', e.target.value)} />
             </div>
-            <button type="button" className="btn btn-danger" style={{ marginBottom: '1rem' }} onClick={() => removeSet(i)}>x</button>
+            <button type="button" className="btn btn-danger btn-sm" style={{ marginBottom: '1rem' }} onClick={() => removeSet(i)}>x</button>
           </div>
         ))}
 
-        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-          <button type="button" className="btn btn-outline" onClick={addSet}>+ Add Set</button>
+        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button type="button" className="btn btn-ghost" onClick={addSet}>+ Add Set</button>
           <button type="submit" className="btn btn-primary">{isEditing ? 'Update Workout' : 'Save Workout'}</button>
         </div>
       </form>

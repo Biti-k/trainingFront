@@ -34,16 +34,16 @@ export function WorkoutDetail() {
       .finally(() => setLoading(false));
   }, [workoutId]);
 
-  if (loading) return <p className="text-muted">Loading...</p>;
-  if (error) return <p style={{ color: 'var(--danger)' }}>{error}</p>;
-  if (!workout) return <p className="text-muted">Workout not found</p>;
+  if (loading) return <p className="text-muted" style={{padding: '2rem', textAlign: 'center'}}>Loading...</p>;
+  if (error) return <p style={{color: 'var(--green-400)', padding: '2rem', textAlign: 'center'}}>{error}</p>;
+  if (!workout) return <p className="text-muted" style={{padding: '2rem', textAlign: 'center'}}>Workout not found</p>;
 
   if (editing) {
     return (
       <div>
-        <div style={{ marginBottom: '1.5rem' }}>
-          <a href="/workouts" className="btn btn-outline" style={{ marginBottom: '1rem' }}>
-            Back to Workouts
+        <div style={{marginBottom: '1.5rem'}}>
+          <a href="/workouts" className="btn btn-ghost" style={{marginBottom: '1rem'}}>
+            ← Back to Workouts
           </a>
         </div>
         <WorkoutForm
@@ -94,17 +94,17 @@ export function WorkoutDetail() {
 
   return (
     <div>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <a href="/workouts" className="btn btn-outline" style={{ marginBottom: '1rem' }}>
-          Back to Workouts
+      <div style={{marginBottom: '1.5rem'}}>
+        <a href="/workouts" className="btn btn-ghost" style={{marginBottom: '1rem'}}>
+          ← Back to Workouts
         </a>
       </div>
 
-      <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="glass" style={{padding: '1.5rem', marginBottom: '1.5rem'}}>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem'}}>
           <div>
-            <h2 style={{ marginBottom: '0.5rem' }}>Workout Details</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            <h2 style={{marginBottom: '0.5rem'}}>Workout Details</h2>
+            <p style={{color: 'var(--text-muted)', fontSize: '0.875rem'}}>
               {new Date(workout.date || '').toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
@@ -113,65 +113,68 @@ export function WorkoutDetail() {
               })}
             </p>
           </div>
-          <button className="btn btn-outline" onClick={() => setEditing(true)}>Edit</button>
-          <div className="stats-grid" style={{ marginBottom: 0 }}>
-            <div className="stat-card">
-              <div className="stat-value">{workout.sets.length}</div>
-              <div className="stat-label">Total Sets</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{Math.round(totalVolume)} kg</div>
-              <div className="stat-label">Total Volume</div>
-            </div>
-            {workout.bodyweight && (
-              <div className="stat-card">
-                <div className="stat-value">{workout.bodyweight} kg</div>
-                <div className="stat-label">Bodyweight</div>
-              </div>
-            )}
+          <button className="btn btn-ghost" onClick={() => setEditing(true)}>Edit Workout</button>
+        </div>
+
+        <div className="stats-grid" style={{marginBottom: '1rem'}}>
+          <div className="stat-card">
+            <div className="stat-value">{workout.sets.length}</div>
+            <div className="stat-label">Total Sets</div>
           </div>
+          <div className="stat-card">
+            <div className="stat-value">{Math.round(totalVolume)} kg</div>
+            <div className="stat-label">Total Volume</div>
+          </div>
+          {workout.bodyweight && (
+            <div className="stat-card">
+              <div className="stat-value">{workout.bodyweight} kg</div>
+              <div className="stat-label">Bodyweight</div>
+            </div>
+          )}
         </div>
 
         {workout.notes && (
-          <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'var(--surface-2)', borderRadius: 'var(--radius)' }}>
-            <strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Notes</strong>
-            <p style={{ marginTop: '0.25rem' }}>{workout.notes}</p>
+          <div style={{padding: '0.75rem', background: 'var(--glass-bg)', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)'}}>
+            <strong style={{fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Notes</strong>
+            <p style={{marginTop: '0.25rem'}}>{workout.notes}</p>
           </div>
         )}
       </div>
 
       {groupedSets.map((group) => (
-        <div className="card" key={group.exercise.id} style={{ marginBottom: '1rem' }}>
-          <h3 style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="glass" key={group.exercise.id} style={{padding: '1.5rem', marginBottom: '1rem'}}>
+          <h3 style={{marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem'}}>
             <span>{group.exercise.name}</span>
             {group.exercise.muscle_group && (
               <span className="badge">{group.exercise.muscle_group}</span>
             )}
           </h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Set</th>
-                <th>Weight (kg)</th>
-                <th>Reps</th>
-                <th>RPE</th>
-                <th>Volume</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {group.sets.map((set) => (
-                <tr key={set.id || set.setNumber}>
-                  <td>{set.setNumber}</td>
-                  <td>{set.weight}</td>
-                  <td>{set.reps}</td>
-                  <td>{set.rpe ?? '—'}</td>
-                  <td>{Math.round(set.weight * set.reps)} kg</td>
-                  <td className="text-muted">{set.notes || '—'}</td>
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Set</th>
+                  <th>Weight (kg)</th>
+                  <th>Reps</th>
+                  <th>RPE</th>
+                  <th>Volume</th>
+                  <th>Notes</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {group.sets.map((set) => (
+                  <tr key={set.id || set.setNumber}>
+                    <td>{set.setNumber}</td>
+                    <td>{set.weight}</td>
+                    <td>{set.reps}</td>
+                    <td>{set.rpe ?? '—'}</td>
+                    <td>{Math.round(set.weight * set.reps)} kg</td>
+                    <td className="text-muted">{set.notes || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ))}
     </div>

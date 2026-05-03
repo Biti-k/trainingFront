@@ -26,13 +26,13 @@ export function VolumeChart() {
   }));
 
   return (
-    <div className="card">
-      <div className="flex-between">
+    <div className="glass" style={{padding: '1.5rem'}}>
+      <div className="flex-between" style={{flexWrap: 'wrap', gap: '0.75rem'}}>
         <h2 style={{ marginBottom: 0 }}>Volume by Date</h2>
         <select
           value={selectedExercise}
           onChange={(e) => setSelectedExercise(e.target.value)}
-          style={{ padding: '0.5rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)' }}
+          style={{padding: '0.5rem 2.5rem 0.5rem 0.75rem', minWidth: '150px'}}
         >
           <option value="">Select exercise...</option>
           {exercises.map((ex) => (
@@ -42,19 +42,19 @@ export function VolumeChart() {
       </div>
 
       {loading ? (
-        <p className="text-muted">Loading...</p>
+        <p className="text-muted" style={{textAlign: 'center', padding: '2rem'}}>Loading...</p>
       ) : chartData.length > 0 ? (
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="date" stroke="var(--text-muted)" tick={{ fontSize: 12 }} />
-            <YAxis stroke="var(--text-muted)" tick={{ fontSize: 12 }} />
-            <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)' }} />
-            <Area type="monotone" dataKey="volume" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.2} name="Volume (kg)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--glass-border)" />
+            <XAxis dataKey="date" stroke="var(--text-muted)" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
+            <YAxis stroke="var(--text-muted)" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
+            <Tooltip contentStyle={{ background: 'rgba(5, 46, 22, 0.9)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)' }} />
+            <Area type="monotone" dataKey="volume" stroke="var(--green-500)" fill="rgba(34, 197, 94, 0.2)" fillOpacity={1} name="Volume (kg)" />
           </AreaChart>
         </ResponsiveContainer>
       ) : (
-        <p className="text-muted">Select an exercise to see volume data</p>
+        <p className="text-muted" style={{textAlign: 'center', padding: '2rem'}}>Select an exercise to see volume data</p>
       )}
     </div>
   );
