@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { api } from '../services/api';
+import { Select } from './ui/Select';
 
 export function BodyweightChart() {
   const [data, setData] = useState<any[]>([]);
@@ -20,15 +21,16 @@ export function BodyweightChart() {
     <div className="glass" style={{padding: '1.5rem'}}>
       <div className="flex-between" style={{flexWrap: 'wrap', gap: '0.75rem'}}>
         <h2 style={{ marginBottom: 0 }}>Bodyweight</h2>
-        <select
-          value={days}
-          onChange={(e) => setDays(parseInt(e.target.value))}
-          style={{padding: '0.5rem 2.5rem 0.5rem 0.75rem', minWidth: '100px'}}
-        >
-          <option value={30}>30 days</option>
-          <option value={90}>90 days</option>
-          <option value={365}>1 year</option>
-        </select>
+        <Select
+          value={String(days)}
+          onChange={(v) => setDays(parseInt(v))}
+          options={[
+            { value: '30', label: '30 days' },
+            { value: '90', label: '90 days' },
+            { value: '365', label: '1 year' },
+          ]}
+          style={{ minWidth: '100px' }}
+        />
       </div>
 
       {data.length > 0 ? (

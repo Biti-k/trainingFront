@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { api } from '../services/api';
+import { Select } from './ui/Select';
 
 export function ProgressionChart() {
   const [data, setData] = useState<any[]>([]);
@@ -27,15 +28,13 @@ export function ProgressionChart() {
     <div className="glass" style={{padding: '1.5rem'}}>
       <div className="flex-between" style={{flexWrap: 'wrap', gap: '0.75rem'}}>
         <h2 style={{ marginBottom: 0 }}>Volume Progression</h2>
-        <select
+        <Select
           value={selectedExercise}
-          onChange={(e) => setSelectedExercise(e.target.value)}
-          style={{padding: '0.5rem 2.5rem 0.5rem 0.75rem', minWidth: '150px'}}
-        >
-          {data.map((d: any) => (
-            <option key={d.exercise_name} value={d.exercise_name}>{d.exercise_name}</option>
-          ))}
-        </select>
+          onChange={(v) => setSelectedExercise(v)}
+          options={data.map((d: any) => ({ value: d.exercise_name, label: d.exercise_name }))}
+          placeholder="Select exercise..."
+          style={{ minWidth: '150px' }}
+        />
       </div>
 
       {selected ? (

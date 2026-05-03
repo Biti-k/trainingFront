@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { Exercise, Set, Workout } from '../types';
+import { Select } from './ui/Select';
 
 interface SetRow {
   exercise_id: number;
@@ -117,12 +118,15 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
           <div key={i} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.5rem', marginBottom: '0.75rem', alignItems: 'end' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label>Exercise</label>
-              <select value={set.exercise_id} onChange={(e) => updateSet(i, 'exercise_id', parseInt(e.target.value))} required>
-                <option value={0}>Select...</option>
-                {exercises.map((ex) => (
-                  <option key={ex.id} value={ex.id}>{ex.name}</option>
-                ))}
-              </select>
+              <Select
+                value={set.exercise_id ? String(set.exercise_id) : ''}
+                onChange={(v) => updateSet(i, 'exercise_id', parseInt(v))}
+                options={[
+                  { value: '', label: 'Select...' },
+                  ...exercises.map((ex) => ({ value: String(ex.id), label: ex.name })),
+                ]}
+                required
+              />
             </div>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label>Weight (kg)</label>
@@ -140,7 +144,10 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
               <label>Notes</label>
               <input type="text" value={set.notes} onChange={(e) => updateSet(i, 'notes', e.target.value)} />
             </div>
-            <button type="button" className="btn btn-danger btn-sm" style={{ marginBottom: '1rem' }} onClick={() => removeSet(i)}>x</button>
+            <div className='form-group' style={{ marginBottom: 0 }}>
+              {/* <label></label> */}
+              <button type="button" className="btn btn-danger btn-sm" style={{ marginTop: '1rem' }} onClick={() => removeSet(i)}>x</button>
+            </div>
           </div>
         ))}
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { api } from '../services/api';
 import type { Exercise } from '../types';
+import { Select } from './ui/Select';
 
 export function VolumeChart() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -29,16 +30,15 @@ export function VolumeChart() {
     <div className="glass" style={{padding: '1.5rem'}}>
       <div className="flex-between" style={{flexWrap: 'wrap', gap: '0.75rem'}}>
         <h2 style={{ marginBottom: 0 }}>Volume by Date</h2>
-        <select
+        <Select
           value={selectedExercise}
-          onChange={(e) => setSelectedExercise(e.target.value)}
-          style={{padding: '0.5rem 2.5rem 0.5rem 0.75rem', minWidth: '150px'}}
-        >
-          <option value="">Select exercise...</option>
-          {exercises.map((ex) => (
-            <option key={ex.id} value={ex.name}>{ex.name}</option>
-          ))}
-        </select>
+          onChange={(v) => setSelectedExercise(v)}
+          options={[
+            { value: '', label: 'Select exercise...' },
+            ...exercises.map((ex) => ({ value: ex.name, label: ex.name })),
+          ]}
+          style={{ minWidth: '150px' }}
+        />
       </div>
 
       {loading ? (
