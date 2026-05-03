@@ -1,0 +1,11 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ExerciseList } from '../components/ExerciseList';
+import { ExerciseForm } from '../components/ExerciseForm';
+---
+
+<Layout title="Exercises">
+  <h1>Exercises</h1>
+  <ExerciseForm client:load />
+  <ExerciseList client:load />
+</Layout>

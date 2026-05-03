@@ -1,0 +1,15 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ProgressionChart } from '../components/ProgressionChart';
+import { BodyweightChart } from '../components/BodyweightChart';
+import { VolumeChart } from '../components/VolumeChart';
+---
+
+<Layout title="Analytics">
+  <h1>Analytics</h1>
+  <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <ProgressionChart client:load />
+    <BodyweightChart client:load />
+    <VolumeChart client:load />
+  </div>
+</Layout>
