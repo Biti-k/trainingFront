@@ -3,17 +3,21 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { api } from '../services/api';
 import { Select } from './ui/Select';
 
-export function BodyweightChart() {
+interface BodyweightChartProps {
+  profileId: number;
+}
+
+export default function BodyweightChart({ profileId }: BodyweightChartProps) {
   const [data, setData] = useState<any[]>([]);
   const [days, setDays] = useState(90);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.analytics.bodyweight(days).then((d: any[]) => {
+    api.analytics.bodyweight(profileId, days).then((d: any[]) => {
       setData(d);
       setLoading(false);
     }).catch(console.error);
-  }, [days]);
+  }, [profileId, days]);
 
   if (loading) return <p className="text-muted" style={{padding: '2rem', textAlign: 'center'}}>Loading...</p>;
 

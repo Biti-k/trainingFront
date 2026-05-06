@@ -3,7 +3,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { api } from '../services/api';
 import { Select } from './ui/Select';
 
-export function Dashboard() {
+interface DashboardProps {
+  profileId: number;
+}
+
+export default function Dashboard({ profileId }: DashboardProps) {
   const [summary, setSummary] = useState<any>(null);
   const [bodyweight, setBodyweight] = useState<any[]>([]);
   const [progression, setProgression] = useState<any[]>([]);
@@ -11,15 +15,15 @@ export function Dashboard() {
 
   useEffect(() => {
     Promise.all([
-      api.analytics.summary(),
-      api.analytics.bodyweight(90),
-      api.analytics.progression(),
+      api.analytics.summary(profileId),
+      api.analytics.bodyweight(profileId, 90),
+      api.analytics.progression(profileId),
     ]).then(([s, bw, p]) => {
       setSummary(s);
       setBodyweight(bw);
       setProgression(p);
     }).catch(console.error).finally(() => setLoading(false));
-  }, []);
+  }, [profileId]);
 
   if (loading) return <p className="text-muted" style={{padding: '2rem', textAlign: 'center'}}>Loading analytics...</p>;
 

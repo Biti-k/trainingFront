@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { api } from '../services/api';
 
-export function ExerciseForm({ onSuccess }: { onSuccess?: () => void }) {
+interface ExerciseFormProps {
+  profileId: number;
+  onSuccess?: () => void;
+}
+
+export default function ExerciseForm({ profileId, onSuccess }: ExerciseFormProps) {
   const [name, setName] = useState('');
   const [muscleGroup, setMuscleGroup] = useState('');
   const [description, setDescription] = useState('');
@@ -15,6 +20,7 @@ export function ExerciseForm({ onSuccess }: { onSuccess?: () => void }) {
         name,
         muscle_group: muscleGroup || undefined,
         description: description || undefined,
+        profile_id: profileId,
       });
       setName('');
       setMuscleGroup('');

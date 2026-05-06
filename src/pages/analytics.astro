@@ -1,15 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { ProgressionChart } from '../components/ProgressionChart';
-import { BodyweightChart } from '../components/BodyweightChart';
-import { VolumeChart } from '../components/VolumeChart';
+import App from '../components/App';
 ---
 
 <Layout title="Analytics">
   <h1>Analytics</h1>
-  <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-    <ProgressionChart client:load />
-    <BodyweightChart client:load />
-    <VolumeChart client:load />
-  </div>
+  <App page="analytics" client:load />
 </Layout>

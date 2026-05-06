@@ -1,12 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { ExerciseList } from '../components/ExerciseList';
-import { ExerciseForm } from '../components/ExerciseForm';
-import { ExerciseLayout } from '@/components/ExerciseLayout';
+import App from '../components/App';
 ---
 
 <Layout title="Exercises">
   <h1>Exercises</h1>
-  <ExerciseLayout client:load>
-  </ExerciseLayout>
+  <App page="exercises" client:load />
 </Layout>

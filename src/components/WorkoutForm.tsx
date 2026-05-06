@@ -11,7 +11,13 @@ interface SetRow {
   notes: string;
 }
 
-export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; workout?: Workout | null }) {
+interface WorkoutFormProps {
+  profileId: number;
+  onSuccess?: () => void;
+  workout?: Workout | null;
+}
+
+export default function WorkoutForm({ profileId, onSuccess, workout }: WorkoutFormProps) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [bodyweight, setBodyweight] = useState('');
   const [notes, setNotes] = useState('');
@@ -20,8 +26,8 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
   const isEditing = !!workout;
 
   useEffect(() => {
-    api.exercises.list().then(setExercises);
-  }, []);
+    api.exercises.list(profileId).then(setExercises);
+  }, [profileId]);
 
   useEffect(() => {
     if (workout) {
@@ -67,6 +73,7 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
       date: workout?.date || new Date().toISOString(),
       bodyweight: bodyweight ? parseFloat(bodyweight) : null,
       notes: notes || null,
+      profile_id: profileId,
       sets: validSets.map((s, i) => ({
         exercise_id: s.exercise_id,
         weight: s.weight,
@@ -79,7 +86,7 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
 
     try {
       if (isEditing && workout?.id) {
-        await api.workouts.update(workout.id, workoutData);
+        await api.workouts.update(workout.id, workoutData, profileId);
       } else {
         await api.workouts.create(workoutData);
         setBodyweight('');
@@ -94,15 +101,15 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
   }
 
   if (exercises.length === 0) {
-    return <p className="text-muted" style={{padding: '2rem', textAlign: 'center'}}>Add exercises first before logging workouts.</p>;
+    return <p className="text-muted p-8 text-center">Add exercises first before logging workouts.</p>;
   }
 
   return (
-    <div className="glass" style={{padding: '1.5rem', marginBottom: '1.5rem'}}>
+    <div className="glass p-6 mb-6">
       <h2>{isEditing ? 'Edit Workout' : 'Log Workout'}</h2>
-      {error && <p style={{ color: 'var(--green-400)', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>}
+      {error && <p className="text-green-400 mb-4 text-sm">{error}</p>}
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
           <div className="form-group">
             <label>Bodyweight (kg)</label>
             <input type="number" step="0.1" value={bodyweight} onChange={(e) => setBodyweight(e.target.value)} placeholder="Optional" />
@@ -113,45 +120,48 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
           </div>
         </div>
 
-        <h3 style={{ margin: '1rem 0 0.75rem' }}>Sets</h3>
+        <h3 className="my-4">Sets</h3>
         {sets.map((set, i) => (
-          <div key={i} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.5rem', marginBottom: '0.75rem', alignItems: 'end' }}>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label>Exercise</label>
-              <Select
-                value={set.exercise_id ? String(set.exercise_id) : ''}
-                onChange={(v) => updateSet(i, 'exercise_id', parseInt(v))}
-                options={[
-                  { value: '', label: 'Select...' },
-                  ...exercises.map((ex) => ({ value: String(ex.id), label: ex.name })),
-                ]}
-                required
-              />
+          <>
+            <div key={i} className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-2 mb-3 items-end">
+              <div className="form-group mb-0">
+                <label>Exercise</label>
+                <Select
+                  value={set.exercise_id ? String(set.exercise_id) : ''}
+                  onChange={(v) => updateSet(i, 'exercise_id', parseInt(v))}
+                  options={[
+                    { value: '', label: 'Select...' },
+                    ...exercises.map((ex) => ({ value: String(ex.id), label: ex.name })),
+                  ]}
+                  required
+                />
+              </div>
+              <div className="form-group mb-0">
+                <label>Weight (kg)</label>
+                <input type="number" step="0.5" min="0" value={set.weight || ''} onChange={(e) => updateSet(i, 'weight', parseFloat(e.target.value))} required />
+              </div>
+              <div className="form-group mb-0">
+                <label>Reps</label>
+                <input type="number" min="0" value={set.reps || ''} onChange={(e) => updateSet(i, 'reps', parseInt(e.target.value))} required />
+              </div>
+              <div className="form-group mb-0">
+                <label>RPE</label>
+                <input type="number" step="0.5" min="1" max="10" value={set.rpe || ''} onChange={(e) => updateSet(i, 'rpe', e.target.value ? parseFloat(e.target.value) : null)} />
+              </div>
+              <div className="form-group mb-0">
+                <label>Notes</label>
+                <input type="text" value={set.notes} onChange={(e) => updateSet(i, 'notes', e.target.value)} />
+              </div>
+              <div className='form-group mb-0'>
+                {/* <label></label> */}
+                <button type="button" className="btn btn-danger btn-sm mt-4" onClick={() => removeSet(i)}>x</button>
+              </div>
             </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label>Weight (kg)</label>
-              <input type="number" step="0.5" min="0" value={set.weight || ''} onChange={(e) => updateSet(i, 'weight', parseFloat(e.target.value))} required />
-            </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label>Reps</label>
-              <input type="number" min="0" value={set.reps || ''} onChange={(e) => updateSet(i, 'reps', parseInt(e.target.value))} required />
-            </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label>RPE</label>
-              <input type="number" step="0.5" min="1" max="10" value={set.rpe || ''} onChange={(e) => updateSet(i, 'rpe', e.target.value ? parseFloat(e.target.value) : null)} />
-            </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label>Notes</label>
-              <input type="text" value={set.notes} onChange={(e) => updateSet(i, 'notes', e.target.value)} />
-            </div>
-            <div className='form-group' style={{ marginBottom: 0 }}>
-              {/* <label></label> */}
-              <button type="button" className="btn btn-danger btn-sm" style={{ marginTop: '1rem' }} onClick={() => removeSet(i)}>x</button>
-            </div>
-          </div>
+            <hr className='border-green-500/5 mb-5'></hr>
+          </>
         ))}
 
-        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div className="mt-4 flex gap-2 flex-wrap">
           <button type="button" className="btn btn-ghost" onClick={addSet}>+ Add Set</button>
           <button type="submit" className="btn btn-primary">{isEditing ? 'Update Workout' : 'Save Workout'}</button>
         </div>

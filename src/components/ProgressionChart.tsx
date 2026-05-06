@@ -3,17 +3,21 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { api } from '../services/api';
 import { Select } from './ui/Select';
 
-export function ProgressionChart() {
+interface ProgressionChartProps {
+  profileId: number;
+}
+
+export default function ProgressionChart({ profileId }: ProgressionChartProps) {
   const [data, setData] = useState<any[]>([]);
   const [selectedExercise, setSelectedExercise] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.analytics.progression().then((p: any[]) => {
+    api.analytics.progression(profileId).then((p: any[]) => {
       setData(p);
       if (p.length > 0) setSelectedExercise(p[0].exercise_name);
     }).catch(console.error).finally(() => setLoading(false));
-  }, []);
+  }, [profileId]);
 
   if (loading) return <p className="text-muted" style={{padding: '2rem', textAlign: 'center'}}>Loading...</p>;
 

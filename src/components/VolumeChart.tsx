@@ -4,21 +4,25 @@ import { api } from '../services/api';
 import type { Exercise } from '../types';
 import { Select } from './ui/Select';
 
-export function VolumeChart() {
+interface VolumeChartProps {
+  profileId: number;
+}
+
+export default function VolumeChart({ profileId }: VolumeChartProps) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selectedExercise, setSelectedExercise] = useState('');
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.exercises.list().then(setExercises).catch(console.error);
-  }, []);
+    api.exercises.list(profileId).then(setExercises).catch(console.error);
+  }, [profileId]);
 
   useEffect(() => {
     if (!selectedExercise) return;
     setLoading(true);
-    api.analytics.volume(selectedExercise, 90).then(setData).catch(console.error).finally(() => setLoading(false));
-  }, [selectedExercise]);
+    api.analytics.volume(profileId, selectedExercise, 90).then(setData).catch(console.error).finally(() => setLoading(false));
+  }, [profileId, selectedExercise]);
 
   const chartData = data.map((d: any) => ({
     date: new Date(d.date).toLocaleDateString(),

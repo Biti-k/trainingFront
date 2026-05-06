@@ -3,6 +3,7 @@ import '../styles/global.css';
 import '../styles/glass.css';
 import '../styles/typography.css';
 import '../styles/components.css';
+import NavProfileSwitcher from '../components/NavProfileSwitcher';
 
 interface Props {
   title: string;
@@ -35,6 +36,7 @@ const { title } = Astro.props;
           <a href="/workouts" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Workouts</a>
           <a href="/analytics" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Analytics</a>
         </div>
+        <NavProfileSwitcher client:load />
       </div>
     </nav>
     <main class="container">

@@ -1,13 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { WorkoutForm } from '../components/WorkoutForm';
-import { WorkoutList } from '../components/WorkoutList';
+import App from '../components/App';
 ---
 
 <Layout title="Workouts">
   <h1>Workouts</h1>
-  <WorkoutForm client:load />
-  <div style="margin-top: 2rem;">
-    <WorkoutList client:load />
-  </div>
+  <App page="workouts" client:load />
 </Layout>

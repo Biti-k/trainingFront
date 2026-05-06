@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { Workout } from '../types';
 
-export function WorkoutList() {
+interface WorkoutListProps {
+  profileId: number;
+}
+
+export default function WorkoutList({ profileId }: WorkoutListProps) {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -11,11 +15,11 @@ export function WorkoutList() {
     const handler = () => loadWorkouts();
     window.addEventListener('workout-saved', handler);
     return () => window.removeEventListener('workout-saved', handler);
-  }, []);
+  }, [profileId]);
 
   async function loadWorkouts() {
     try {
-      const data = await api.workouts.list(0, 100);
+      const data = await api.workouts.list(profileId, 0, 100);
       setWorkouts(data);
     } catch (e) {
       console.error(e);
@@ -27,7 +31,7 @@ export function WorkoutList() {
   async function handleDelete(id: number) {
     if (!confirm('Delete this workout?')) return;
     try {
-      await api.workouts.delete(id);
+      await api.workouts.delete(id, profileId);
       loadWorkouts();
     } catch (e) {
       console.error(e);

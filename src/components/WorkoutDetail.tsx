@@ -8,23 +8,32 @@ interface GroupedSet {
   sets: (Set & { setNumber: number })[];
 }
 
-export function WorkoutDetail() {
+export default function WorkoutDetail() {
   const [workoutId, setWorkoutId] = useState('');
+  const [profileId, setProfileId] = useState<number | null>(null);
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
+  const [managingSets, setManagingSets] = useState(false);
+  const [addingToExercise, setAddingToExercise] = useState<number | null>(null);
+  const [newSetData, setNewSetData] = useState({ weight: '', reps: '', rpe: '', notes: '' });
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
+    const stored = localStorage.getItem('activeProfileId');
+    if (stored) {
+      setProfileId(parseInt(stored));
+    }
     setWorkoutId(new URLSearchParams(window.location.search).get('id') || '');
   }, []);
 
   useEffect(() => {
-    if (!workoutId) return;
+    if (!workoutId || !profileId) return;
     Promise.all([
-      api.workouts.get(parseInt(workoutId)) as Promise<Workout>,
-      api.exercises.list() as Promise<Exercise[]>,
+      api.workouts.get(parseInt(workoutId), profileId) as Promise<Workout>,
+      api.exercises.list(profileId) as Promise<Exercise[]>,
     ])
       .then(([w, ex]) => {
         setWorkout(w);
@@ -32,27 +41,28 @@ export function WorkoutDetail() {
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [workoutId]);
+  }, [workoutId, profileId]);
 
-  if (loading) return <p className="text-muted" style={{padding: '2rem', textAlign: 'center'}}>Loading...</p>;
-  if (error) return <p style={{color: 'var(--green-400)', padding: '2rem', textAlign: 'center'}}>{error}</p>;
-  if (!workout) return <p className="text-muted" style={{padding: '2rem', textAlign: 'center'}}>Workout not found</p>;
+  if (loading) return <p className="text-muted p-8 text-center">Loading...</p>;
+  if (error) return <p className="text-green-400 p-8 text-center">{error}</p>;
+  if (!workout) return <p className="text-muted p-8 text-center">Workout not found</p>;
 
   if (editing) {
     return (
       <div>
-        <div style={{marginBottom: '1.5rem'}}>
-          <a href="/workouts" className="btn btn-ghost" style={{marginBottom: '1rem'}}>
+        <div className="mb-6">
+          <a href="/workouts" className="btn btn-ghost mb-4">
             ← Back to Workouts
           </a>
         </div>
         <WorkoutForm
+          profileId={profileId!}
           workout={workout}
           onSuccess={() => {
             setEditing(false);
             Promise.all([
-              api.workouts.get(parseInt(workoutId)) as Promise<Workout>,
-              api.exercises.list() as Promise<Exercise[]>,
+              api.workouts.get(parseInt(workoutId), profileId!) as Promise<Workout>,
+              api.exercises.list(profileId!) as Promise<Exercise[]>,
             ]).then(([w, ex]) => {
               setWorkout(w);
               setExercises(ex);
@@ -92,6 +102,49 @@ export function WorkoutDetail() {
 
   const totalVolume = workout.sets.reduce((sum, s) => sum + s.weight * s.reps, 0);
 
+  const handleAddSet = async (exerciseId: number) => {
+    if (!workout || !newSetData.weight || !newSetData.reps) return;
+    setActionLoading(true);
+    try {
+      const maxOrder = Math.max(...workout.sets.map(s => s.order), 0);
+      const setData = {
+        exercise_id: exerciseId,
+        weight: parseFloat(newSetData.weight),
+        reps: parseInt(newSetData.reps),
+        rpe: newSetData.rpe ? parseFloat(newSetData.rpe) : null,
+        order: maxOrder + 1,
+        notes: newSetData.notes || null,
+      };
+      const newSet = await api.sets.create(parseInt(workoutId), setData, profileId!);
+      setWorkout({
+        ...workout,
+        sets: [...workout.sets, newSet],
+      });
+      setAddingToExercise(null);
+      setNewSetData({ weight: '', reps: '', rpe: '', notes: '' });
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteSet = async (setId: number) => {
+    if (!confirm('Delete this set?')) return;
+    setActionLoading(true);
+    try {
+      await api.sets.delete(setId, profileId!);
+      setWorkout({
+        ...workout!,
+        sets: workout!.sets.filter(s => s.id !== setId),
+      });
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   return (
     <div>
       <div style={{marginBottom: '1.5rem'}}>
@@ -100,11 +153,11 @@ export function WorkoutDetail() {
         </a>
       </div>
 
-      <div className="glass" style={{padding: '1.5rem', marginBottom: '1.5rem'}}>
-        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem'}}>
+      <div className="glass p-6 mb-6">
+        <div className="flex justify-between items-start flex-wrap gap-4 mb-6">
           <div>
-            <h2 style={{marginBottom: '0.5rem'}}>Workout Details</h2>
-            <p style={{color: 'var(--text-muted)', fontSize: '0.875rem'}}>
+            <h2 className="mb-2">Workout Details</h2>
+            <p className="text-text-muted text-sm">
               {new Date(workout.date || '').toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
@@ -113,10 +166,15 @@ export function WorkoutDetail() {
               })}
             </p>
           </div>
-          <button className="btn btn-ghost" onClick={() => setEditing(true)}>Edit Workout</button>
+          <div className="flex gap-2">
+            <button className="btn btn-ghost" onClick={() => setEditing(true)}>Edit Workout</button>
+            <button className="btn btn-ghost" onClick={() => setManagingSets(!managingSets)}>
+              {managingSets ? 'Done Managing' : 'Manage Sets'}
+            </button>
+          </div>
         </div>
 
-        <div className="stats-grid" style={{marginBottom: '1rem'}}>
+        <div className="stats-grid mb-4">
           <div className="stat-card">
             <div className="stat-value">{workout.sets.length}</div>
             <div className="stat-label">Total Sets</div>
@@ -134,16 +192,16 @@ export function WorkoutDetail() {
         </div>
 
         {workout.notes && (
-          <div style={{padding: '0.75rem', background: 'var(--glass-bg)', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)'}}>
-            <strong style={{fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Notes</strong>
-            <p style={{marginTop: '0.25rem'}}>{workout.notes}</p>
+          <div className="p-3 bg-glass-bg rounded-md border border-glass-border">
+            <strong className="text-xs text-text-muted uppercase tracking-wider">Notes</strong>
+            <p className="mt-1">{workout.notes}</p>
           </div>
         )}
       </div>
 
       {groupedSets.map((group) => (
-        <div className="glass" key={group.exercise.id} style={{padding: '1.5rem', marginBottom: '1rem'}}>
-          <h3 style={{marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem'}}>
+        <div className="glass p-6 mb-4" key={group.exercise.id}>
+          <h3 className="mb-4 flex justify-between items-center flex-wrap gap-2">
             <span>{group.exercise.name}</span>
             {group.exercise.muscle_group && (
               <span className="badge">{group.exercise.muscle_group}</span>
@@ -159,6 +217,7 @@ export function WorkoutDetail() {
                   <th>RPE</th>
                   <th>Volume</th>
                   <th>Notes</th>
+                  {managingSets && <th></th>}
                 </tr>
               </thead>
               <tbody>
@@ -170,11 +229,93 @@ export function WorkoutDetail() {
                     <td>{set.rpe ?? '—'}</td>
                     <td>{Math.round(set.weight * set.reps)} kg</td>
                     <td className="text-muted">{set.notes || '—'}</td>
+                    {managingSets && (
+                      <td>
+                        {set.id !== undefined && (
+                          <button
+                            className="btn btn-ghost px-2 py-1 text-sm text-green-400"
+                            onClick={() => handleDeleteSet(set.id!)}
+                            disabled={actionLoading}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          {managingSets && (
+            <div className="mt-4">
+              {addingToExercise === group.exercise.id ? (
+                <div className='flex gap-6'>
+                  <div className='form-group'>
+                    <input
+                      type="number"
+                      placeholder="Weight"
+                      value={newSetData.weight}
+                      onChange={(e) => setNewSetData({...newSetData, weight: e.target.value})}
+                      className="w-20 px-2 py-1 text-sm"
+                    />
+                  </div>
+                  <div className='form-group'>
+                    <input
+                      type="number"
+                      placeholder="Reps"
+                      value={newSetData.reps}
+                      onChange={(e) => setNewSetData({...newSetData, reps: e.target.value})}
+                      className="w-20 px-2 py-1 text-sm"
+                    />
+                  </div>
+                  <div className='form-group'>
+                    <input
+                      type="number"
+                      placeholder="RPE"
+                      value={newSetData.rpe}
+                      onChange={(e) => setNewSetData({...newSetData, rpe: e.target.value})}
+                      className="w-20 px-2 py-1 text-sm"
+                    />
+                  </div>
+                  <div className='form-group'>
+                    <input
+                      type="text"
+                      placeholder="Notes"
+                      value={newSetData.notes}
+                      onChange={(e) => setNewSetData({...newSetData, notes: e.target.value})}
+                      className="w-[120px] px-2 py-1 text-sm"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      className="btn btn-primary px-3 py-1 text-sm"
+                      onClick={() => handleAddSet(group.exercise.id)}
+                      disabled={actionLoading || !newSetData.weight || !newSetData.reps}
+                    >
+                      {actionLoading ? 'Adding...' : 'Add Set'}
+                    </button>
+                    <button
+                      className="btn btn-ghost px-3 py-1 text-sm"
+                      onClick={() => {
+                        setAddingToExercise(null);
+                        setNewSetData({ weight: '', reps: '', rpe: '', notes: '' });
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  className="btn btn-ghost px-3 py-1 text-sm"
+                  onClick={() => setAddingToExercise(group.exercise.id)}
+                >
+                  + Add Set
+                </button>
+              )}
+            </div>
+          )}
         </div>
       ))}
     </div>
