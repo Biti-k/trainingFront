@@ -40,7 +40,7 @@ export function ProgressionChart() {
       {selected ? (
         <>
           <div style={{ display: 'flex', gap: '1.5rem', margin: '1rem 0', fontSize: '0.875rem', flexWrap: 'wrap' }}>
-            <span>Max: <strong style={{color: 'var(--green-400)'}}>{selected.max_weight} kg</strong></span>
+            <span>Max: <strong style={{color: 'var(--green-400)'}}>{selected.max_weight} kg ({selected.max_reps} reps)</strong></span>
             <span>Avg: <strong style={{color: 'var(--green-400)'}}>{selected.avg_weight} kg</strong></span>
             <span>Est. 1RM: <strong style={{color: 'var(--green-400)'}}>{selected.estimated_1rm || '—'} kg</strong></span>
             <span>Sessions: <strong style={{color: 'var(--green-400)'}}>{selected.sessions}</strong></span>
