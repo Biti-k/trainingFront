@@ -19,8 +19,10 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
   const [error, setError] = useState('');
   const isEditing = !!workout;
 
+
   useEffect(() => {
-    api.exercises.list().then(setExercises);
+    const storedId: number = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
+    api.exercises.list(storedId).then(setExercises);
   }, []);
 
   useEffect(() => {
@@ -64,6 +66,7 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
     }
 
     const workoutData = {
+      profile_id: parseInt(window.localStorage.getItem('activeProfileId')!, 10),
       date: workout?.date || new Date().toISOString(),
       bodyweight: bodyweight ? parseFloat(bodyweight) : null,
       notes: notes || null,
@@ -78,10 +81,11 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
     };
 
     try {
+      const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
       if (isEditing && workout?.id) {
-        await api.workouts.update(workout.id, workoutData);
+        await api.workouts.update(workout.id, profileId, workoutData);
       } else {
-        await api.workouts.create(workoutData);
+        await api.workouts.create(profileId, workoutData);
         setBodyweight('');
         setNotes('');
         setSets([{ exercise_id: 0, weight: 0, reps: 0, rpe: null, notes: '' }]);
