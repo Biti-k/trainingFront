@@ -9,7 +9,8 @@ export function BodyweightChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.analytics.bodyweight(days).then((d: any[]) => {
+    const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
+    api.analytics.bodyweight(profileId, days).then((d: any[]) => {
       setData(d);
       setLoading(false);
     }).catch(console.error);

@@ -15,7 +15,8 @@ export function WorkoutList() {
 
   async function loadWorkouts() {
     try {
-      const data = await api.workouts.list(0, 100);
+      let profileId : number = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
+      const data = await api.workouts.list(profileId, 0, 100);
       setWorkouts(data);
     } catch (e) {
       console.error(e);
@@ -27,7 +28,8 @@ export function WorkoutList() {
   async function handleDelete(id: number) {
     if (!confirm('Delete this workout?')) return;
     try {
-      await api.workouts.delete(id);
+      const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
+      await api.workouts.delete(id, profileId);
       loadWorkouts();
     } catch (e) {
       console.error(e);

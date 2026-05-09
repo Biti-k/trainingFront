@@ -3,6 +3,7 @@ import '../styles/global.css';
 import '../styles/glass.css';
 import '../styles/typography.css';
 import '../styles/components.css';
+import { ProfileDisplay } from '../components/ProfileDisplay';
 
 interface Props {
   title: string;
@@ -34,6 +35,11 @@ const { title } = Astro.props;
           <a href="/exercises" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Exercises</a>
           <a href="/workouts" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Workouts</a>
           <a href="/analytics" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Analytics</a>
+          <a href="/profiles" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Profiles</a>
+          <a href="/profiles" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;"></a>
+        </div>
+        <div id="profile-display" class="profile-display" style="margin-left: auto;">
+          <ProfileDisplay client:load />
         </div>
       </div>
     </nav>
@@ -80,3 +86,5 @@ const { title } = Astro.props;
     }
   }
 </style>
+
+

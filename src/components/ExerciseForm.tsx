@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { api } from '../services/api';
 
-export function ExerciseForm({ onSuccess }: { onSuccess?: () => void }) {
+export function ExerciseForm({
+  profileId,
+  onSuccess,
+}: {
+  profileId: number;
+  onSuccess?: () => void;
+}) {
   const [name, setName] = useState('');
   const [muscleGroup, setMuscleGroup] = useState('');
   const [description, setDescription] = useState('');
@@ -11,7 +17,7 @@ export function ExerciseForm({ onSuccess }: { onSuccess?: () => void }) {
     e.preventDefault();
     setError('');
     try {
-      await api.exercises.create({
+      await api.exercises.create(profileId, {
         name,
         muscle_group: muscleGroup || undefined,
         description: description || undefined,

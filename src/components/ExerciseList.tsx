@@ -2,18 +2,18 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { Exercise } from '../types';
 
-export function ExerciseList() {
+export function ExerciseList({ profileId }: { profileId: number }) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    loadExercises();
-  }, []);
+    if (profileId) loadExercises();
+  }, [profileId]);
 
   async function loadExercises(muscleGroup?: string) {
     try {
-      const data = await api.exercises.list(muscleGroup);
+      const data = await api.exercises.list(profileId, muscleGroup);
       setExercises(data);
     } catch (e) {
       console.error(e);
@@ -25,7 +25,7 @@ export function ExerciseList() {
   async function handleDelete(id: number) {
     if (!confirm('Delete this exercise?')) return;
     try {
-      await api.exercises.delete(id);
+      await api.exercises.delete(id, profileId);
       loadExercises(filter || undefined);
     } catch (e) {
       console.error(e);
