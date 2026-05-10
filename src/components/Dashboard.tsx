@@ -40,7 +40,7 @@ export function Dashboard() {
           <div className="stat-label">Exercises Tracked</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value">{summary?.avg_bodyweight ? `${summary.avg_bodyweight} kg` : '—'}</div>
+          <div className="stat-value">{summary?.avg_bodyweight ? `${summary.avg_bodyweight.toFixed(1)} kg` : '—'}</div>
           <div className="stat-label">Avg Bodyweight</div>
         </div>
       </div>
