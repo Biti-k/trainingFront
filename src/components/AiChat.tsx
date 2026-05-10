@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-const API_BASE = import.meta.env.PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8000";
 
 interface Message {
   role: "user" | "ai";
