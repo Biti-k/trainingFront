@@ -11,6 +11,27 @@ interface Props {
 const { title } = Astro.props;
 ---
 
+<!-- Add this just before </body> -->
+<script>
+  const EXEMPT_PATHS = ['/profiles'];
+
+  function checkActiveProfile() {
+    const activeProfileId = localStorage.getItem('activeProfileId');
+    const currentPath = window.location.pathname;
+    const isExempt = EXEMPT_PATHS.some(p => currentPath.startsWith(p));
+
+    if (!activeProfileId && !isExempt) {
+      window.location.href = '/profiles';
+    }
+  }
+
+  // Run on first load
+  checkActiveProfile();
+
+  // Run on client-side navigation (if using View Transitions)
+  document.addEventListener('astro:page-load', checkActiveProfile);
+</script>
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -86,5 +107,6 @@ const { title } = Astro.props;
     }
   }
 </style>
+
 
 
