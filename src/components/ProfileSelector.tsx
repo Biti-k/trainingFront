@@ -99,14 +99,14 @@ export default function ProfileSelector({ onProfileSelect, selectedProfile }: Pr
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(34,197,94,0.12),_transparent_35%)] py-12">
+    <div className="min-h-screen py-12">
       <div className="container mx-auto px-4">
         <div className="glass p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h1 className="text-3xl font-bold text-emerald-100">Select Profile</h1>
               <p className="mt-2 max-w-2xl text-sm text-emerald-200/80">
-                Choose a profile to scope your exercises, workouts, and analytics. Add a new profile or delete one any time.
+                Choose a profile to scope your exercises, workouts, and analytics. Add a new profile or delete one any time. 🥸💪
               </p>
             </div>
             <button
@@ -199,7 +199,7 @@ export default function ProfileSelector({ onProfileSelect, selectedProfile }: Pr
                         Active profile
                       </div>
                     ) : null}
-                    <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-emerald-500/20 to-transparent" />
+                    <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-emerald-500/20 to-transparent -z-10" />
                     <div className="relative flex items-start justify-center gap-4">
                       <div className="grid h-64 w-64 place-items-center rounded-full bg-emerald-200/10 text-3xl font-bold text-emerald-100 ring-1 ring-emerald-300/30">
                         {profile.name.charAt(0).toUpperCase()}
