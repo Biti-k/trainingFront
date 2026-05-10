@@ -3,12 +3,34 @@ import '../styles/global.css';
 import '../styles/glass.css';
 import '../styles/typography.css';
 import '../styles/components.css';
+import { ProfileDisplay } from '../components/ProfileDisplay';
 
 interface Props {
   title: string;
 }
 const { title } = Astro.props;
 ---
+
+<!-- Add this just before </body> -->
+<script>
+  const EXEMPT_PATHS = ['/profiles'];
+
+  function checkActiveProfile() {
+    const activeProfileId = localStorage.getItem('activeProfileId');
+    const currentPath = window.location.pathname;
+    const isExempt = EXEMPT_PATHS.some(p => currentPath.startsWith(p));
+
+    if (!activeProfileId && !isExempt) {
+      window.location.href = '/profiles';
+    }
+  }
+
+  // Run on first load
+  checkActiveProfile();
+
+  // Run on client-side navigation (if using View Transitions)
+  document.addEventListener('astro:page-load', checkActiveProfile);
+</script>
 
 <!doctype html>
 <html lang="en">
@@ -34,6 +56,11 @@ const { title } = Astro.props;
           <a href="/exercises" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Exercises</a>
           <a href="/workouts" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Workouts</a>
           <a href="/analytics" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Analytics</a>
+          <a href="/profiles" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Profiles</a>
+          <a href="/profiles" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;"></a>
+        </div>
+        <div id="profile-display" class="profile-display" style="margin-left: auto;">
+          <ProfileDisplay client:load />
         </div>
       </div>
     </nav>
@@ -80,3 +107,6 @@ const { title } = Astro.props;
     }
   }
 </style>
+
+
+

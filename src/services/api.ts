@@ -1,4 +1,4 @@
-import type { Exercise, Workout, WorkoutSummary, VolumeByDate, ProgressionStats, BodyweightTrend } from '../types';
+import type { Exercise, Workout, WorkoutSummary, VolumeByDate, ProgressionStats, BodyweightTrend, Profile } from '../types';
 
 const API_BASE = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000';
 
@@ -11,41 +11,70 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const error = await res.text();
     throw new Error(error || `Request failed: ${res.status}`);
   }
+  if (res.status === 204) {
+    return undefined as unknown as T;
+  }
   return res.json();
 }
 
 export const api = {
   exercises: {
-    list: (muscleGroup?: string): Promise<Exercise[]> => {
-      const q = muscleGroup ? `?muscle_group=${muscleGroup}` : '';
-      return request(`/exercises/${q}`);
+    list: (profileId: number, muscleGroup?: string): Promise<Exercise[]> => {
+      const params = new URLSearchParams({ profile_id: String(profileId) });
+      if (muscleGroup) params.set('muscle_group', muscleGroup);
+      return request(`/exercises/?${params.toString()}`);
     },
-    get: (id: number): Promise<Exercise> => request(`/exercises/${id}`),
-    create: (data: { name: string; muscle_group?: string; description?: string }) =>
-      request<Exercise>('/exercises/', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: number, data: { name: string; muscle_group?: string; description?: string }) =>
-      request<Exercise>(`/exercises/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    delete: (id: number) => request(`/exercises/${id}`, { method: 'DELETE' }),
+    get: (id: number, profileId: number): Promise<Exercise> =>
+      request(`/exercises/${id}?profile_id=${profileId}`),
+    create: (
+      profileId: number,
+      data: { name: string; muscle_group?: string; description?: string },
+    ) => request<Exercise>(`/exercises/?profile_id=${profileId}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (
+      id: number,
+      profileId: number,
+      data: { name: string; muscle_group?: string; description?: string },
+    ) =>
+      request<Exercise>(`/exercises/${id}?profile_id=${profileId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number, profileId: number) =>
+      request(`/exercises/${id}?profile_id=${profileId}`, { method: 'DELETE' }),
+  },
+  profiles: {
+    list: (): Promise<Profile[]> => request('/profiles/'),
+    create: (data: { name: string; profile_image?: string | null }) =>
+      request<Profile>('/profiles/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) => request<void>(`/profiles/${id}`, { method: 'DELETE' }),
   },
   workouts: {
-    list: (skip = 0, limit = 50): Promise<Workout[]> => request(`/workouts/?skip=${skip}&limit=${limit}`),
-    get: (id: number): Promise<Workout> => request(`/workouts/${id}`),
-    create: (data: any): Promise<Workout> => request('/workouts/', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: number, data: any): Promise<Workout> =>
-      request(`/workouts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    delete: (id: number) => request(`/workouts/${id}`, { method: 'DELETE' }),
+    list: (profileId: number, skip = 0, limit = 50): Promise<Workout[]> => request(`/workouts/?profile_id=${profileId}&skip=${skip}&limit=${limit}`),
+    get: (id: number, profileId: number): Promise<Workout> => request(`/workouts/${id}?profile_id=${profileId}`),
+    create: (profileId: number, data: any): Promise<Workout> => request(`/workouts/?profile_id=${profileId}`, { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, profileId: number, data: any): Promise<Workout> =>
+      request(`/workouts/${id}?profile_id=${profileId}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: number, profileId: number) => request(`/workouts/${id}?profile_id=${profileId}`, { method: 'DELETE' }),
   },
   analytics: {
-    summary: (): Promise<WorkoutSummary> => request('/analytics/summary'),
-    volume: (exerciseName?: string, days = 90): Promise<VolumeByDate[]> => {
-      const q = exerciseName ? `?exercise_name=${exerciseName}&days=${days}` : `?days=${days}`;
+    summary: (profileId: number): Promise<WorkoutSummary> => request(`/analytics/summary?profile_id=${profileId}`),
+    volume: (profileId: number, exerciseName?: string, days = 90): Promise<VolumeByDate[]> => {
+      const q = exerciseName ? `?profile_id=${profileId}&exercise_name=${exerciseName}&days=${days}` : `?profile_id=${profileId}&days=${days}`;
       return request(`/analytics/volume${q}`);
     },
-    progression: (exerciseName?: string): Promise<ProgressionStats[]> => {
-      const q = exerciseName ? `?exercise_name=${exerciseName}` : '';
+    progression: (profileId: number, exerciseName?: string): Promise<ProgressionStats[]> => {
+      const q = exerciseName ? `?profile_id=${profileId}&exercise_name=${exerciseName}` : `?profile_id=${profileId}`;
       return request(`/analytics/progression${q}`);
     },
-    bodyweight: (days = 90): Promise<BodyweightTrend[]> => request(`/analytics/bodyweight?days=${days}`),
-    strength: (exerciseName: string): Promise<any> => request(`/analytics/strength/${exerciseName}`),
+    bodyweight: (profileId: number, days = 90): Promise<BodyweightTrend[]> =>
+      request(`/analytics/bodyweight?profile_id=${profileId}&days=${days}`),
+    strength: (profileId: number, exerciseName: string): Promise<any> =>
+      request(`/analytics/strength/${exerciseName}?profile_id=${profileId}`),
   },
 };

@@ -10,10 +10,11 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
     Promise.all([
-      api.analytics.summary(),
-      api.analytics.bodyweight(90),
-      api.analytics.progression(),
+      api.analytics.summary(profileId),
+      api.analytics.bodyweight(profileId, 90),
+      api.analytics.progression(profileId),
     ]).then(([s, bw, p]) => {
       setSummary(s);
       setBodyweight(bw);

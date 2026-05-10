@@ -22,9 +22,10 @@ export function WorkoutDetail() {
 
   useEffect(() => {
     if (!workoutId) return;
+    const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
     Promise.all([
-      api.workouts.get(parseInt(workoutId)) as Promise<Workout>,
-      api.exercises.list() as Promise<Exercise[]>,
+      api.workouts.get(parseInt(workoutId), profileId) as Promise<Workout>,
+      api.exercises.list(profileId) as Promise<Exercise[]>,
     ])
       .then(([w, ex]) => {
         setWorkout(w);
@@ -50,9 +51,10 @@ export function WorkoutDetail() {
           workout={workout}
           onSuccess={() => {
             setEditing(false);
+            const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
             Promise.all([
-              api.workouts.get(parseInt(workoutId)) as Promise<Workout>,
-              api.exercises.list() as Promise<Exercise[]>,
+              api.workouts.get(parseInt(workoutId), profileId) as Promise<Workout>,
+              api.exercises.list(profileId) as Promise<Exercise[]>,
             ]).then(([w, ex]) => {
               setWorkout(w);
               setExercises(ex);
@@ -80,6 +82,7 @@ export function WorkoutDetail() {
         name: getExerciseName(set.exercise_id),
         muscle_group: null,
         description: null,
+        profile_id: 0,
         created_at: '',
       };
       const group: GroupedSet = { exercise, sets: [] };

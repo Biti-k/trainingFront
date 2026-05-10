@@ -3,7 +3,15 @@ export interface Exercise {
   name: string;
   muscle_group: string | null;
   description: string | null;
+  profile_id: number | null;
   created_at: string;
+}
+
+export interface Profile {
+  id: number;
+  name: string;
+  created_at: string;
+  profile_image?: string | null;
 }
 
 export interface Set {
@@ -21,6 +29,7 @@ export interface Workout {
   date: string | null;
   notes: string | null;
   bodyweight: number | null;
+  profile_id: number;
   sets: Set[];
 }
 
