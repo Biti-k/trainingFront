@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import type { Exercise, Set, Workout } from '../types';
+import type { Exercise, Workout } from '../types';
 import { Select } from './ui/Select';
 
 interface SetRow {
@@ -59,7 +59,7 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
     e.preventDefault();
     setError('');
 
-    const validSets = sets.filter((s) => s.exercise_id && s.weight > 0 && s.reps > 0);
+    const validSets = sets.filter((s) => s.exercise_id && s.weight >= 0 && s.reps > 0);
     if (validSets.length === 0) {
       setError('Add at least one valid set');
       return;
@@ -98,15 +98,15 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
   }
 
   if (exercises.length === 0) {
-    return <p className="text-muted" style={{padding: '2rem', textAlign: 'center'}}>Add exercises first before logging workouts.</p>;
+    return <p className="text-muted p-8 text-center">Add exercises first before logging workouts.</p>;
   }
 
   return (
-    <div className="glass" style={{padding: '1.5rem', marginBottom: '1.5rem'}}>
+    <div className="glass p-6 mb-6">
       <h2>{isEditing ? 'Edit Workout' : 'Log Workout'}</h2>
-      {error && <p style={{ color: 'var(--green-400)', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>}
+      {error && <p className="text-green-400 mb-4 text-sm">{error}</p>}
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
           <div className="form-group">
             <label>Bodyweight (kg)</label>
             <input type="number" step="0.1" value={bodyweight} onChange={(e) => setBodyweight(e.target.value)} placeholder="Optional" />
@@ -117,10 +117,10 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
           </div>
         </div>
 
-        <h3 style={{ margin: '1rem 0 0.75rem' }}>Sets</h3>
+        <h3 className="my-4 mb-3">Sets</h3>
         {sets.map((set, i) => (
-          <div key={i} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.5rem', marginBottom: '0.75rem', alignItems: 'end' }}>
-            <div className="form-group" style={{ marginBottom: 0 }}>
+          <div key={i} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-3 items-end">
+            <div className="form-group mb-0">
               <label>Exercise</label>
               <Select
                 value={set.exercise_id ? String(set.exercise_id) : ''}
@@ -132,30 +132,30 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
                 required
               />
             </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
+            <div className="form-group mb-0">
               <label>Weight (kg)</label>
-              <input type="number" step="0.5" min="0" value={set.weight || ''} onChange={(e) => updateSet(i, 'weight', parseFloat(e.target.value))} required />
+              <input type="number" step="0.5" value={set.weight || ''} onChange={(e) => updateSet(i, 'weight', e.target.value === '' ? 0 : parseFloat(e.target.value))}/>
             </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
+            <div className="form-group mb-0">
               <label>Reps</label>
               <input type="number" min="0" value={set.reps || ''} onChange={(e) => updateSet(i, 'reps', parseInt(e.target.value))} required />
             </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
+            <div className="form-group mb-0">
               <label>RPE</label>
               <input type="number" step="0.5" min="1" max="10" value={set.rpe || ''} onChange={(e) => updateSet(i, 'rpe', e.target.value ? parseFloat(e.target.value) : null)} />
             </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
+            <div className="form-group mb-0">
               <label>Notes</label>
               <input type="text" value={set.notes} onChange={(e) => updateSet(i, 'notes', e.target.value)} />
             </div>
-            <div className='form-group' style={{ marginBottom: 0 }}>
+            <div className='form-group mb-0'>
               {/* <label></label> */}
-              <button type="button" className="btn btn-danger btn-sm" style={{ marginTop: '1rem' }} onClick={() => removeSet(i)}>x</button>
+              <button type="button" className="btn btn-danger btn-sm mt-4" onClick={() => removeSet(i)}>x</button>
             </div>
           </div>
         ))}
 
-        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div className="mt-4 flex gap-2 flex-wrap">
           <button type="button" className="btn btn-ghost" onClick={addSet}>+ Add Set</button>
           <button type="submit" className="btn btn-primary">{isEditing ? 'Update Workout' : 'Save Workout'}</button>
         </div>
