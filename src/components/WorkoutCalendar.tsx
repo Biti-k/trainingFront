@@ -41,7 +41,8 @@ export function WorkoutCalendar() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(new Date()));
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     loadWorkouts();
@@ -61,13 +62,6 @@ export function WorkoutCalendar() {
       ]);
       setWorkouts(data);
       setExercises(exercisesData);
-      if (data.length > 0) {
-        const firstWorkoutDate = new Date(data[0].date || '');
-        if (!Number.isNaN(firstWorkoutDate.getTime())) {
-          setCurrentMonth(startOfMonth(firstWorkoutDate));
-          setSelectedDate(firstWorkoutDate);
-        }
-      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -89,8 +83,8 @@ export function WorkoutCalendar() {
     return Object.fromEntries(exercises.map((exercise) => [exercise.id, exercise])) as Record<number, Exercise>;
   }, [exercises]);
 
-  const selectedKey = formatDateKey(selectedDate);
-  const selectedWorkouts = workoutsByDate[selectedKey] || [];
+  const selectedKey = selectedDate ? formatDateKey(selectedDate) : '';
+  const selectedWorkouts = selectedDate ? (workoutsByDate[selectedKey] || []) : [];
   const calendarDays = useMemo(() => getCalendarDays(currentMonth), [currentMonth]);
 
   function getWorkoutTags(workout: Workout) {
@@ -124,12 +118,13 @@ export function WorkoutCalendar() {
 
   function selectDay(day: Date) {
     setSelectedDate(day);
+    setShowModal(true);
   }
 
   const monthLabel = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(currentMonth);
 
   if (loading) {
-    return <p className="text-muted" style={{ padding: '2rem', textAlign: 'center' }}>Loading workouts...</p>;
+    return <p style={{ padding: '2rem', textAlign: 'center' }}>Loading workouts...</p>;
   }
 
   return (
@@ -137,7 +132,7 @@ export function WorkoutCalendar() {
       <div className="flex-between" style={{ marginBottom: '1rem', gap: '1rem', flexWrap: 'wrap' }}>
         <div>
           <h2 style={{ marginBottom: '0.5rem' }}>Training Calendar</h2>
-          <p className="text-muted" style={{ margin: 0 }}>Click any day to view workouts and volume details.</p>
+          <p className="text-green-50" style={{ margin: 0 }}>Click any day to view workouts and volume details.</p>
         </div>
         <div className="flex-between" style={{ gap: '0.5rem' }}>
           <button type="button" className="btn btn-ghost" onClick={() => changeMonth('prev')}>Previous</button>
@@ -186,57 +181,67 @@ export function WorkoutCalendar() {
         })}
       </div>
 
-      <div className="calendar-details glass" style={{ marginTop: '1.5rem', padding: '1.5rem' }}>
-        <div className="flex-between" style={{ gap: '1rem', flexWrap: 'wrap' }}>
-          <div>
-            <h3 style={{ margin: 0 }}>Workouts on {new Date(selectedDate).toLocaleDateString()}</h3>
-            {selectedWorkouts.length > 0 && (
-              <div className="calendar-day-tags" style={{ marginTop: '0.5rem' }}>
-                {getDayTags(selectedWorkouts).map((tag) => (
-                  <span key={tag} className="calendar-tag">{tag}</span>
-                ))}
+      <div className="calendar-details glass" style={{ marginTop: '1.5rem', padding: '1.5rem' }} />
+
+      {showModal && selectedDate && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h3 style={{ margin: 0 }}>Workouts on {selectedDate.toLocaleDateString()}</h3>
+                {selectedWorkouts.length > 0 && (
+                  <div className="calendar-day-tags" style={{ marginTop: '0.5rem' }}>
+                    {getDayTags(selectedWorkouts).map((tag) => (
+                      <span key={tag} className="calendar-tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setShowModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            {selectedWorkouts.length === 0 ? (
+              <p >No workouts logged on this date.</p>
+            ) : (
+              <div className="calendar-workout-list">
+                {selectedWorkouts.map((workout) => {
+                  const totalVolume = workout.sets.reduce((sum, set) => sum + set.weight * set.reps, 0);
+                  const workoutExercises = Array.from(
+                    new Set(
+                      workout.sets.map((set) => exerciseById[set.exercise_id]?.name || `Exercise #${set.exercise_id}`),
+                    ),
+                  );
+                  return (
+                    <button
+                      key={workout.id}
+                      type="button"
+                      className="glass calendar-workout-item"
+                      onClick={() => window.location.href = `/workout-detail?id=${workout.id}`}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 600, color: 'var(--green-100)' }}>Workout {workout.id}</div>
+                        <div >Sets: {workout.sets.length} • Volume: {Math.round(totalVolume)} kg • Bodyweight: {workout.bodyweight ? `${workout.bodyweight} kg` : '—'}</div>
+                        <div className="calendar-day-tags" style={{ marginTop: '0.75rem' }}>
+                          {workoutExercises.slice(0, 3).map((name) => (
+                            <span key={name} className="calendar-tag">{name}</span>
+                          ))}
+                        </div>
+                      </div>
+                      {workout.notes && <div  style={{ marginTop: '0.5rem' }}>{workout.notes}</div>}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
-          {selectedWorkouts.length > 0 && (
-            <button type="button" className="btn btn-ghost" onClick={() => window.location.href = `/workout-detail?id=${selectedWorkouts[0].id}`}>Open first workout</button>
-          )}
         </div>
-
-        {selectedWorkouts.length === 0 ? (
-          <p className="text-muted" style={{ marginTop: '1rem' }}>No workouts logged on this date.</p>
-        ) : (
-          <div className="calendar-workout-list" style={{ marginTop: '1rem' }}>
-            {selectedWorkouts.map((workout) => {
-              const totalVolume = workout.sets.reduce((sum, set) => sum + set.weight * set.reps, 0);
-              const workoutExercises = Array.from(
-                new Set(
-                  workout.sets.map((set) => exerciseById[set.exercise_id]?.name || `Exercise #${set.exercise_id}`),
-                ),
-              );
-              return (
-                <button
-                  key={workout.id}
-                  type="button"
-                  className="glass calendar-workout-item"
-                  onClick={() => window.location.href = `/workout-detail?id=${workout.id}`}
-                >
-                  <div>
-                    <div style={{ fontWeight: 600, color: 'var(--green-100)' }}>Workout {workout.id}</div>
-                    <div className="text-muted">Sets: {workout.sets.length} • Volume: {Math.round(totalVolume)} kg • Bodyweight: {workout.bodyweight ? `${workout.bodyweight} kg` : '—'}</div>
-                    <div className="calendar-day-tags" style={{ marginTop: '0.75rem' }}>
-                      {workoutExercises.slice(0, 3).map((name) => (
-                        <span key={name} className="calendar-tag">{name}</span>
-                      ))}
-                    </div>
-                  </div>
-                  {workout.notes && <div className="text-muted" style={{ marginTop: '0.5rem' }}>{workout.notes}</div>}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
