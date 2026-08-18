@@ -9,8 +9,7 @@ export function ProgressionChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
-    api.analytics.progression(profileId).then((p: any[]) => {
+    api.analytics.progression().then((p: any[]) => {
       setData(p);
       if (p.length > 0) setSelectedExercise(p[0].exercise_name);
     }).catch(console.error).finally(() => setLoading(false));

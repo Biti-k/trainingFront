@@ -3,34 +3,32 @@ import '../styles/global.css';
 import '../styles/glass.css';
 import '../styles/typography.css';
 import '../styles/components.css';
-import { ProfileDisplay } from '../components/ProfileDisplay';
 import { AiChat } from '../components/AiChat';
 
 interface Props {
   title: string;
 }
 const { title } = Astro.props;
+
+const token = Astro.cookies.get('session')?.value;
+let displayName = '';
+if (token) {
+  try {
+    const res = await fetch(`${import.meta.env.PUBLIC_API_BASE}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const me = await res.json();
+      displayName = me.name || me.email;
+    }
+  } catch {
+    displayName = '';
+  }
+}
 ---
 
-<!-- Add this just before </body> -->
-<script>
-  const EXEMPT_PATHS = ['/profiles'];
-
-  function checkActiveProfile() {
-    const activeProfileId = localStorage.getItem('activeProfileId');
-    const currentPath = window.location.pathname;
-    const isExempt = EXEMPT_PATHS.some(p => currentPath.startsWith(p));
-
-    if (!activeProfileId && !isExempt) {
-      window.location.href = '/profiles';
-    }
-  }
-
-  // Run on first load
-  checkActiveProfile();
-
-  // Run on client-side navigation (if using View Transitions)
-  document.addEventListener('astro:page-load', checkActiveProfile);
+<script define:vars={{ token }} is:inline>
+  window.__SESSION_TOKEN__ = token;
 </script>
 
 <!doctype html>
@@ -58,11 +56,10 @@ const { title } = Astro.props;
           <a href="/exercises" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Exercises</a>
           <a href="/workouts" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Workouts</a>
           <a href="/analytics" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Analytics</a>
-          <a href="/profiles" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;">Profiles</a>
-          <a href="/profiles" style="color: var(--text-secondary); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;"></a>
         </div>
-        <div id="profile-display" class="profile-display" style="margin-left: auto;">
-          <ProfileDisplay client:load />
+        <div id="profile-display" class="profile-display" style="margin-left: auto; display: flex; align-items: center; gap: 1rem;">
+          {displayName && <span class="text-muted" style="font-size: 0.875rem;">Hi {displayName}</span>}
+          <a href="/api/auth/logout" class="btn btn-ghost" style="font-size: 0.875rem;">Logout</a>
         </div>
       </div>
     </nav>
@@ -109,6 +106,3 @@ const { title } = Astro.props;
     }
   }
 </style>
-
-
-

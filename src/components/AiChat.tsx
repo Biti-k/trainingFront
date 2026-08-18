@@ -40,9 +40,6 @@ export function AiChat() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const profileId =
-    typeof window !== "undefined" ? localStorage.getItem("activeProfileId") : null;
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
@@ -60,13 +57,14 @@ export function AiChat() {
     setLoading(true);
 
     try {
+      const token = typeof window !== "undefined" ? (window as any).__SESSION_TOKEN__ : null;
       const res = await fetch(`${API_BASE}/ai/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: text,
-          profile_id: profileId ? Number(profileId) : undefined,
-        }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ message: text }),
       });
 
       if (!res.ok) {
@@ -141,7 +139,7 @@ export function AiChat() {
                 Workout Assistant
               </div>
               <div className="text-xs text-white/40 mt-0.5">
-                {profileId ? "With your profile context" : "No active profile"}
+                Context from your workouts
               </div>
             </div>
             <div className="ml-auto w-2 h-2 rounded-full bg-green-400 shadow-[0_0_6px_theme(colors.green.400)]" />

@@ -4,27 +4,9 @@ import '../styles/glass.css';
 import '../styles/typography.css';
 import '../styles/components.css';
 
-export const prerender = false;  // 👈 esto
+export const prerender = false;
 
-if (Astro.request.method === 'POST') {
-  const form = await Astro.request.formData();
-  const password = form.get('password');
-
-  if (password === import.meta.env.APP_PASSWORD) {
-    const response = new Response(null, {
-      status: 302,
-      headers: {
-        'Location': '/',
-        'Set-Cookie': `session=authenticated; HttpOnly; Path=/; Max-Age=${60 * 60 * 24 * 30}`, // 30 días
-      },
-    });
-    return response;
-  }
-
-  return new Response(null, { status: 302, headers: { Location: '/login?error=1' } });
-}
-
-const error = Astro.url.searchParams.get('error');
+const apiBase = import.meta.env.PUBLIC_API_BASE;
 ---
 
 <html lang="en">
@@ -33,19 +15,11 @@ const error = Astro.url.searchParams.get('error');
     <title>Login | Strength Trainer</title>
   </head>
   <body style="display: grid; place-items: center; min-height: 100vh;">
-    <div class="glass--heavy" style="padding: 2rem; border-radius: var(--radius-lg); width: 100%; max-width: 360px;">
+    <div class="glass--heavy" style="padding: 2rem; border-radius: var(--radius-lg); width: 100%; max-width: 360px; text-align: center;">
       <h1 class="text-glow" style="margin-bottom: 1.5rem; font-size: 1.5rem;">The Biti Trainer</h1>
-      {error && <p style="color: var(--red-400); margin-bottom: 1rem; font-size: 0.875rem;">Incorrect password</p>}
-      <form method="POST" enctype="application/x-www-form-urlencoded" style="display: flex; flex-direction: column; gap: 1rem;">
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          autofocus
-          style="padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-primary); width: 100%;"
-        />
-        <button type="submit" class="btn btn-primary">Login</button>
-      </form>
+      <a href={`${apiBase}/auth/google/login`} class="btn btn-primary" style="display: inline-block;">
+        Sign in with Google
+      </a>
     </div>
   </body>
 </html>

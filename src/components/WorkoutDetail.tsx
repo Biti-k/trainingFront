@@ -22,10 +22,9 @@ export function WorkoutDetail() {
 
   useEffect(() => {
     if (!workoutId) return;
-    const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
     Promise.all([
-      api.workouts.get(parseInt(workoutId), profileId) as Promise<Workout>,
-      api.exercises.list(profileId) as Promise<Exercise[]>,
+      api.workouts.get(parseInt(workoutId)) as Promise<Workout>,
+      api.exercises.list() as Promise<Exercise[]>,
     ])
       .then(([w, ex]) => {
         setWorkout(w);
@@ -51,10 +50,9 @@ export function WorkoutDetail() {
           workout={workout}
           onSuccess={() => {
             setEditing(false);
-            const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
             Promise.all([
-              api.workouts.get(parseInt(workoutId), profileId) as Promise<Workout>,
-              api.exercises.list(profileId) as Promise<Exercise[]>,
+              api.workouts.get(parseInt(workoutId)) as Promise<Workout>,
+              api.exercises.list() as Promise<Exercise[]>,
             ]).then(([w, ex]) => {
               setWorkout(w);
               setExercises(ex);
@@ -65,9 +63,16 @@ export function WorkoutDetail() {
     );
   }
 
-  const getExerciseName = (exerciseId: number): string => {
+  const getExercise = (exerciseId: number): Exercise => {
     const ex = exercises.find((e) => e.id === exerciseId);
-    return ex ? ex.name : `Exercise #${exerciseId}`;
+    return ex || {
+      id: exerciseId,
+      name: `Exercise #${exerciseId}`,
+      muscle_group: null,
+      description: null,
+      image_url: null,
+      created_at: '',
+    };
   };
 
   const groupedSets: GroupedSet[] = [];
@@ -77,14 +82,7 @@ export function WorkoutDetail() {
 
   for (const set of sortedSets) {
     if (!exerciseMap.has(set.exercise_id)) {
-      const exercise: Exercise = {
-        id: set.exercise_id,
-        name: getExerciseName(set.exercise_id),
-        muscle_group: null,
-        description: null,
-        profile_id: 0,
-        created_at: '',
-      };
+      const exercise = getExercise(set.exercise_id);
       const group: GroupedSet = { exercise, sets: [] };
       exerciseMap.set(set.exercise_id, group);
       groupedSets.push(group);
@@ -146,8 +144,42 @@ export function WorkoutDetail() {
 
       {groupedSets.map((group) => (
         <div className="glass" key={group.exercise.id} style={{padding: '1.5rem', marginBottom: '1rem'}}>
-          <h3 style={{marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem'}}>
-            <span>{group.exercise.name}</span>
+          <h3 style={{marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0}}>
+              {group.exercise.image_url ? (
+                <img
+                  src={group.exercise.image_url}
+                  alt=""
+                  style={{
+                    width: 56,
+                    height: 56,
+                    objectFit: 'cover',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--glass-border)',
+                    boxShadow: 'var(--shadow-green-sm)',
+                    flexShrink: 0,
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px dashed var(--glass-border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.375rem',
+                    color: 'var(--text-muted)',
+                    flexShrink: 0,
+                  }}
+                >
+                  🏋️
+                </div>
+              )}
+              <span>{group.exercise.name}</span>
+            </div>
             {group.exercise.muscle_group && (
               <span className="badge">{group.exercise.muscle_group}</span>
             )}

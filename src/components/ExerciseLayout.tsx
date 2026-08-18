@@ -1,38 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ExerciseForm } from './ExerciseForm';
 import { ExerciseList } from './ExerciseList';
+import { ExerciseCatalogPicker } from './ExerciseCatalogPicker';
 
-export function ExerciseLayout({ profileId }: { profileId?: number }) {
-  const [activeProfileId, setActiveProfileId] = useState<number | null>(profileId ?? null);
+export function ExerciseLayout() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-
-  useEffect(() => {
-    if (profileId) {
-      setActiveProfileId(profileId);
-      return;
-    }
-    const storedId = window.localStorage.getItem('activeProfileId');
-    if (storedId) {
-      setActiveProfileId(parseInt(storedId, 10));
-    }
-  }, [profileId]);
+  const [tab, setTab] = useState<'catalog' | 'custom'>('catalog');
 
   const successExercises = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  if (!activeProfileId) {
-    return (
-      <div className="glass" style={{ padding: '1.5rem' }}>
-        <p>Please select a profile to view exercises.</p>
-      </div>
-    );
-  }
-
   return (
     <>
-      <ExerciseForm profileId={activeProfileId} onSuccess={successExercises} />
-      <ExerciseList key={refreshTrigger} profileId={activeProfileId} />
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+        <button className={`btn ${tab === 'catalog' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setTab('catalog')}>
+          Browse Catalog
+        </button>
+        <button className={`btn ${tab === 'custom' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setTab('custom')}>
+          Create Custom
+        </button>
+      </div>
+
+      {tab === 'catalog' ? (
+        <ExerciseCatalogPicker onAdded={successExercises} />
+      ) : (
+        <ExerciseForm onSuccess={successExercises} />
+      )}
+      <ExerciseList key={refreshTrigger} />
     </>
   );
 }

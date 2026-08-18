@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { api } from '../services/api';
 
 export function ExerciseForm({
-  profileId,
   onSuccess,
 }: {
-  profileId: number;
   onSuccess?: () => void;
 }) {
   const [name, setName] = useState('');
@@ -17,7 +15,7 @@ export function ExerciseForm({
     e.preventDefault();
     setError('');
     try {
-      await api.exercises.create(profileId, {
+      await api.exercises.create({
         name,
         muscle_group: muscleGroup || undefined,
         description: description || undefined,

@@ -1,6 +1,6 @@
 import { defineMiddleware } from 'astro:middleware';
 
-const PUBLIC_PATHS = ['/login'];
+const PUBLIC_PATHS = ['/login', '/auth/'];
 
 export const onRequest = defineMiddleware((context, next) => {
   const { pathname } = context.url;
@@ -9,8 +9,7 @@ export const onRequest = defineMiddleware((context, next) => {
     return next();
   }
 
-  const cookie = context.request.headers.get('cookie') ?? '';
-  const isAuthenticated = cookie.includes('session=authenticated');
+  const isAuthenticated = Boolean(context.cookies.get('session')?.value);
 
   if (!isAuthenticated) {
     return context.redirect('/login');

@@ -3,15 +3,25 @@ export interface Exercise {
   name: string;
   muscle_group: string | null;
   description: string | null;
-  profile_id: number | null;
+  image_url: string | null;
   created_at: string;
 }
 
-export interface Profile {
+export interface ExerciseCatalogItem {
   id: number;
+  external_id: string;
   name: string;
-  created_at: string;
-  profile_image?: string | null;
+  muscle_group: string | null;
+  primary_muscles: string | null;
+  secondary_muscles: string | null;
+  category: string | null;
+  equipment: string | null;
+  level: string | null;
+  mechanic: string | null;
+  force: string | null;
+  instructions: string | null;
+  image_url: string | null;
+  image_url_2: string | null;
 }
 
 export interface Set {
@@ -29,7 +39,6 @@ export interface Workout {
   date: string | null;
   notes: string | null;
   bodyweight: number | null;
-  profile_id: number;
   sets: Set[];
 }
 

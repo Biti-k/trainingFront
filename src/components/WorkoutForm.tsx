@@ -21,8 +21,7 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
 
 
   useEffect(() => {
-    const storedId: number = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
-    api.exercises.list(storedId).then(setExercises);
+    api.exercises.list().then(setExercises);
   }, []);
 
   useEffect(() => {
@@ -66,7 +65,6 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
     }
 
     const workoutData = {
-      profile_id: parseInt(window.localStorage.getItem('activeProfileId')!, 10),
       date: workout?.date || new Date().toISOString(),
       bodyweight: bodyweight ? parseFloat(bodyweight) : null,
       notes: notes || null,
@@ -81,11 +79,10 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
     };
 
     try {
-      const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
       if (isEditing && workout?.id) {
-        await api.workouts.update(workout.id, profileId, workoutData);
+        await api.workouts.update(workout.id, workoutData);
       } else {
-        await api.workouts.create(profileId, workoutData);
+        await api.workouts.create(workoutData);
         setBodyweight('');
         setNotes('');
         setSets([{ exercise_id: 0, weight: 0, reps: 0, rpe: null, notes: '' }]);
@@ -122,15 +119,38 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
           <div key={i} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-3 items-end">
             <div className="form-group mb-0">
               <label>Exercise</label>
-              <Select
-                value={set.exercise_id ? String(set.exercise_id) : ''}
-                onChange={(v) => updateSet(i, 'exercise_id', parseInt(v))}
-                options={[
-                  { value: '', label: 'Select...' },
-                  ...exercises.map((ex) => ({ value: String(ex.id), label: ex.name })),
-                ]}
-                required
-              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Select
+                    value={set.exercise_id ? String(set.exercise_id) : ''}
+                    onChange={(v) => updateSet(i, 'exercise_id', parseInt(v))}
+                    options={[
+                      { value: '', label: 'Select...' },
+                      ...exercises.map((ex) => ({ value: String(ex.id), label: ex.name })),
+                    ]}
+                    style={{ width: '100%' }}
+                    required
+                  />
+                </div>
+                {(() => {
+                  const selected = exercises.find((ex) => ex.id === set.exercise_id);
+                  return selected?.image_url ? (
+                    <img
+                      src={selected.image_url}
+                      alt=""
+                      style={{
+                        width: 44,
+                        height: 44,
+                        objectFit: 'cover',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--glass-border)',
+                        boxShadow: 'var(--shadow-green-sm)',
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : null;
+                })()}
+              </div>
             </div>
             <div className="form-group mb-0">
               <label>Weight (kg)</label>

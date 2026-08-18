@@ -1,0 +1,6 @@
+allowBuilds:
+  esbuild: true
+  sharp: true
+minimumReleaseAgeExclude:
+  - '@astrojs/internal-helpers@0.10.3'
+  - '@astrojs/vercel@11.0.6'

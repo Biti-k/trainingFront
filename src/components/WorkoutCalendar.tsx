@@ -5,7 +5,10 @@ import type { Exercise, Workout } from '../types';
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function formatDateKey(date: Date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function startOfMonth(date: Date) {
@@ -54,11 +57,9 @@ export function WorkoutCalendar() {
   async function loadWorkouts() {
     setLoading(true);
     try {
-      const profileId = parseInt(window.localStorage.getItem('activeProfileId') || '0', 10);
-      if (!profileId) return;
       const [data, exercisesData] = await Promise.all([
-        api.workouts.list(profileId, 0, 200),
-        api.exercises.list(profileId),
+        api.workouts.list(0, 200),
+        api.exercises.list(),
       ]);
       setWorkouts(data);
       setExercises(exercisesData);

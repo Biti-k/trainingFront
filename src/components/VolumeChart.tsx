@@ -11,15 +11,13 @@ export function VolumeChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
-    api.exercises.list(profileId).then(setExercises).catch(console.error);
+    api.exercises.list().then(setExercises).catch(console.error);
   }, []);
 
   useEffect(() => {
     if (!selectedExercise) return;
-    const profileId = parseInt(window.localStorage.getItem('activeProfileId')!, 10);
     setLoading(true);
-    api.analytics.volume(profileId, selectedExercise, 90).then(setData).catch(console.error).finally(() => setLoading(false));
+    api.analytics.volume(selectedExercise, 90).then(setData).catch(console.error).finally(() => setLoading(false));
   }, [selectedExercise]);
 
   const chartData = data.map((d: any) => ({
