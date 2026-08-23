@@ -10,7 +10,7 @@ This is the frontend half of the project. The API it talks to lives in a compani
 - **Workout logging** — record a session as a set of exercises × sets, each with weight, reps, and optional RPE and notes; edit or delete any past workout.
 - **Exercise library** — maintain your own list of exercises, or pull from a built-in exercise catalog (with muscle group, equipment, and instructions) instead of typing them from scratch.
 - **Analytics dashboard** — volume and progression charts per exercise, bodyweight trend over time, and a calendar view of training frequency (via Recharts).
-- **AI training assistant** — a chat widget (Google Gemini) that answers fitness questions using your actual recent workout history as context, plus one-click "analyze my progress" and "suggest my next workout" actions.
+- **AI training assistant** — a chat widget (Google Gemini) that answers fitness questions using your actual recent workout history as context.
 - A little 3D dumbbell (Three.js) on the dashboard, because why not.
 
 ## Tech stack
