@@ -15,6 +15,7 @@ export function WorkoutDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     setWorkoutId(new URLSearchParams(window.location.search).get('id') || '');
@@ -93,6 +94,18 @@ export function WorkoutDetail() {
 
   const totalVolume = workout.sets.reduce((sum, s) => sum + s.weight * s.reps, 0);
 
+  async function handleDelete() {
+    if (!workout || !confirm('Delete this workout? This cannot be undone.')) return;
+    setDeleting(true);
+    try {
+      await api.workouts.delete(workout.id!);
+      window.location.href = '/workouts';
+    } catch (e) {
+      console.error(e);
+      setDeleting(false);
+    }
+  }
+
   return (
     <div>
       <div style={{marginBottom: '1.5rem'}}>
@@ -114,7 +127,12 @@ export function WorkoutDetail() {
               })}
             </p>
           </div>
-          <button className="btn btn-ghost" onClick={() => setEditing(true)}>Edit Workout</button>
+          <div style={{display: 'flex', gap: '0.5rem'}}>
+            <button className="btn btn-ghost" onClick={() => setEditing(true)}>Edit Workout</button>
+            <button className="btn btn-danger" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Deleting...' : 'Delete Workout'}
+            </button>
+          </div>
         </div>
 
         <div className="stats-grid" style={{marginBottom: '1rem'}}>
