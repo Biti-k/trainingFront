@@ -123,7 +123,7 @@ export function WorkoutForm({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="form-group">
             <label>Date</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+            <input type="date" lang="en-GB" value={date} onChange={(e) => setDate(e.target.value)} required />
           </div>
           <div className="form-group">
             <label>Bodyweight (kg)</label>
