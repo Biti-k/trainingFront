@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { Workout, Exercise, Set } from '../types';
 import { WorkoutForm } from './WorkoutForm';
+import { parseDateOnly, formatDateLong } from '../utils/date';
 
 interface GroupedSet {
   exercise: Exercise;
@@ -119,12 +120,7 @@ export function WorkoutDetail() {
           <div>
             <h2 style={{marginBottom: '0.5rem'}}>Workout Details</h2>
             <p style={{color: 'var(--text-muted)', fontSize: '0.875rem'}}>
-              {new Date(workout.date || '').toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
+              {formatDateLong(parseDateOnly(workout.date || ''))}
             </p>
           </div>
           <div style={{display: 'flex', gap: '0.5rem'}}>

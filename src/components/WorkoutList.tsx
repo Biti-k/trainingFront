@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { Workout } from '../types';
+import { parseDateOnly, formatDate } from '../utils/date';
 
 export function WorkoutList() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -56,7 +57,7 @@ export function WorkoutList() {
               const exerciseNames = [...new Set(w.sets.map((s) => s.exercise_id))];
               return (
                 <tr key={w.id} style={{ cursor: 'pointer' }} onClick={() => window.location.href = `/workout-detail?id=${w.id}`}>
-                  <td>{new Date(w.date || '').toLocaleDateString()}</td>
+                  <td>{formatDate(parseDateOnly(w.date || ''))}</td>
                   <td>{exerciseNames.length} exercise{exerciseNames.length !== 1 ? 's' : ''}</td>
                   <td>{w.sets.length}</td>
                   <td>{Math.round(totalVolume)} kg</td>

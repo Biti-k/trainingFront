@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api';
 import type { Exercise, Workout } from '../types';
+import { WorkoutForm } from './WorkoutForm';
+import { formatDate } from '../utils/date';
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -46,6 +48,7 @@ export function WorkoutCalendar() {
   const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [creatingWorkout, setCreatingWorkout] = useState(false);
 
   useEffect(() => {
     loadWorkouts();
@@ -120,9 +123,15 @@ export function WorkoutCalendar() {
   function selectDay(day: Date) {
     setSelectedDate(day);
     setShowModal(true);
+    setCreatingWorkout(false);
   }
 
-  const monthLabel = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(currentMonth);
+  function closeModal() {
+    setShowModal(false);
+    setCreatingWorkout(false);
+  }
+
+  const monthLabel = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' }).format(currentMonth);
 
   if (loading) {
     return <p style={{ padding: '2rem', textAlign: 'center' }}>Loading workouts...</p>;
@@ -185,11 +194,11 @@ export function WorkoutCalendar() {
       <div className="calendar-details glass" style={{ marginTop: '1.5rem', padding: '1.5rem' }} />
 
       {showModal && selectedDate && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className={`modal-content ${creatingWorkout ? 'modal-content--wide' : ''}`} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
-                <h3 style={{ margin: 0 }}>Workouts on {selectedDate.toLocaleDateString()}</h3>
+                <h3 style={{ margin: 0 }}>Workouts on {formatDate(selectedDate)}</h3>
                 {selectedWorkouts.length > 0 && (
                   <div className="calendar-day-tags" style={{ marginTop: '0.5rem' }}>
                     {getDayTags(selectedWorkouts).map((tag) => (
@@ -201,44 +210,61 @@ export function WorkoutCalendar() {
               <button
                 type="button"
                 className="modal-close"
-                onClick={() => setShowModal(false)}
+                onClick={closeModal}
               >
                 ✕
               </button>
             </div>
 
-            {selectedWorkouts.length === 0 ? (
-              <p >No workouts logged on this date.</p>
+            {creatingWorkout ? (
+              <WorkoutForm
+                initialDate={selectedDate}
+                onSuccess={() => setCreatingWorkout(false)}
+              />
             ) : (
-              <div className="calendar-workout-list">
-                {selectedWorkouts.map((workout) => {
-                  const totalVolume = workout.sets.reduce((sum, set) => sum + set.weight * set.reps, 0);
-                  const workoutExercises = Array.from(
-                    new Set(
-                      workout.sets.map((set) => exerciseById[set.exercise_id]?.name || `Exercise #${set.exercise_id}`),
-                    ),
-                  );
-                  return (
-                    <button
-                      key={workout.id}
-                      type="button"
-                      className="glass calendar-workout-item"
-                      onClick={() => window.location.href = `/workout-detail?id=${workout.id}`}
-                    >
-                      <div>
-                        <div style={{ fontWeight: 600, color: 'var(--green-100)' }}>Workout {workout.id}</div>
-                        <div >Sets: {workout.sets.length} • Volume: {Math.round(totalVolume)} kg • Bodyweight: {workout.bodyweight ? `${workout.bodyweight} kg` : '—'}</div>
-                        <div className="calendar-day-tags" style={{ marginTop: '0.75rem' }}>
-                          {workoutExercises.slice(0, 3).map((name) => (
-                            <span key={name} className="calendar-tag">{name}</span>
-                          ))}
-                        </div>
-                      </div>
-                      {workout.notes && <div  style={{ marginTop: '0.5rem' }}>{workout.notes}</div>}
-                    </button>
-                  );
-                })}
-              </div>
+              <>
+                {selectedWorkouts.length === 0 ? (
+                  <p>No workouts logged on this date.</p>
+                ) : (
+                  <div className="calendar-workout-list">
+                    {selectedWorkouts.map((workout) => {
+                      const totalVolume = workout.sets.reduce((sum, set) => sum + set.weight * set.reps, 0);
+                      const workoutExercises = Array.from(
+                        new Set(
+                          workout.sets.map((set) => exerciseById[set.exercise_id]?.name || `Exercise #${set.exercise_id}`),
+                        ),
+                      );
+                      return (
+                        <button
+                          key={workout.id}
+                          type="button"
+                          className="glass calendar-workout-item"
+                          onClick={() => window.location.href = `/workout-detail?id=${workout.id}`}
+                        >
+                          <div>
+                            <div style={{ fontWeight: 600, color: 'var(--green-100)' }}>Workout {workout.id}</div>
+                            <div >Sets: {workout.sets.length} • Volume: {Math.round(totalVolume)} kg • Bodyweight: {workout.bodyweight ? `${workout.bodyweight} kg` : '—'}</div>
+                            <div className="calendar-day-tags" style={{ marginTop: '0.75rem' }}>
+                              {workoutExercises.slice(0, 3).map((name) => (
+                                <span key={name} className="calendar-tag">{name}</span>
+                              ))}
+                            </div>
+                          </div>
+                          {workout.notes && <div  style={{ marginTop: '0.5rem' }}>{workout.notes}</div>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ marginTop: '1rem' }}
+                  onClick={() => setCreatingWorkout(true)}
+                >
+                  + Log a workout for this day
+                </button>
+              </>
             )}
           </div>
         </div>

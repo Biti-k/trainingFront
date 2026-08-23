@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { api } from '../services/api';
 import { Select } from './ui/Select';
 import { DumbbellScene } from './DumbbellScene';
+import { parseDateOnly, formatDate } from '../utils/date';
 
 export function Dashboard() {
   const [summary, setSummary] = useState<any>(null);
@@ -63,9 +64,9 @@ export function Dashboard() {
                 <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={bodyweight}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--glass-border)" />
-                    <XAxis dataKey="date" tickFormatter={(d: string) => new Date(d).toLocaleDateString()} stroke="var(--text-muted)" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
+                    <XAxis dataKey="date" tickFormatter={(d: string) => formatDate(parseDateOnly(d))} stroke="var(--text-muted)" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
                     <YAxis stroke="var(--text-muted)" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
-                    <Tooltip labelFormatter={(l: string) => new Date(l).toLocaleDateString()} contentStyle={{ background: 'rgba(5, 46, 22, 0.9)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)' }} />
+                    <Tooltip labelFormatter={(l: string) => formatDate(parseDateOnly(l))} contentStyle={{ background: 'rgba(5, 46, 22, 0.9)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)' }} />
                     <Line type="monotone" dataKey="bodyweight" stroke="var(--green-500)" strokeWidth={2} dot={false} />
                     <Line type="monotone" dataKey="sma_7" stroke="var(--emerald-400)" strokeWidth={2} dot={false} strokeDasharray="5 5" />
                   </LineChart>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { api } from '../services/api';
 import { Select } from './ui/Select';
+import { parseDateOnly, formatDate } from '../utils/date';
 
 export function BodyweightChart() {
   const [data, setData] = useState<any[]>([]);
@@ -37,9 +38,9 @@ export function BodyweightChart() {
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--glass-border)" />
-            <XAxis dataKey="date" tickFormatter={(d: string) => new Date(d).toLocaleDateString()} stroke="var(--text-muted)" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
+            <XAxis dataKey="date" tickFormatter={(d: string) => formatDate(parseDateOnly(d))} stroke="var(--text-muted)" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
             <YAxis stroke="var(--text-muted)" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
-            <Tooltip labelFormatter={(l: string) => new Date(l).toLocaleDateString()} contentStyle={{ background: 'rgba(5, 46, 22, 0.9)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)' }} />
+            <Tooltip labelFormatter={(l: string) => formatDate(parseDateOnly(l))} contentStyle={{ background: 'rgba(5, 46, 22, 0.9)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)' }} />
             <Line type="monotone" dataKey="bodyweight" stroke="var(--green-500)" strokeWidth={2} dot={false} name="Bodyweight" />
           </LineChart>
         </ResponsiveContainer>

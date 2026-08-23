@@ -3,6 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { api } from '../services/api';
 import type { Exercise } from '../types';
 import { Select } from './ui/Select';
+import { parseDateOnly, formatDate } from '../utils/date';
 
 export function VolumeChart() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -21,7 +22,7 @@ export function VolumeChart() {
   }, [selectedExercise]);
 
   const chartData = data.map((d: any) => ({
-    date: new Date(d.date).toLocaleDateString(),
+    date: formatDate(parseDateOnly(d.date)),
     volume: d.total_volume,
     weight: d.max_weight,
   }));

@@ -11,8 +11,24 @@ interface SetRow {
   notes: string;
 }
 
-export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; workout?: Workout | null }) {
+function toDateInputValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function WorkoutForm({
+  onSuccess,
+  workout,
+  initialDate,
+}: {
+  onSuccess?: () => void;
+  workout?: Workout | null;
+  initialDate?: Date;
+}) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [date, setDate] = useState(() => toDateInputValue(initialDate ?? new Date()));
   const [bodyweight, setBodyweight] = useState('');
   const [notes, setNotes] = useState('');
   const [sets, setSets] = useState<SetRow[]>([{ exercise_id: 0, weight: 0, reps: 0, rpe: null, notes: '' }]);
@@ -26,6 +42,7 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
 
   useEffect(() => {
     if (workout) {
+      setDate(workout.date ? workout.date.slice(0, 10) : toDateInputValue(new Date()));
       setBodyweight(workout.bodyweight ? String(workout.bodyweight) : '');
       setNotes(workout.notes || '');
       if (workout.sets.length > 0) {
@@ -65,7 +82,7 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
     }
 
     const workoutData = {
-      date: workout?.date || new Date().toISOString(),
+      date: `${date}T00:00:00.000Z`,
       bodyweight: bodyweight ? parseFloat(bodyweight) : null,
       notes: notes || null,
       sets: validSets.map((s, i) => ({
@@ -103,7 +120,11 @@ export function WorkoutForm({ onSuccess, workout }: { onSuccess?: () => void; wo
       <h2>{isEditing ? 'Edit Workout' : 'Log Workout'}</h2>
       {error && <p className="text-green-400 mb-4 text-sm">{error}</p>}
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="form-group">
+            <label>Date</label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          </div>
           <div className="form-group">
             <label>Bodyweight (kg)</label>
             <input type="number" step="0.1" value={bodyweight} onChange={(e) => setBodyweight(e.target.value)} placeholder="Optional" />
