@@ -7,9 +7,18 @@ interface Message {
   text: string;
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // Añade esta función arriba del componente
 function renderMarkdown(text: string) {
-  const html = text
+  const html = escapeHtml(text)
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")   // **negrita**
     .replace(/\*(.+?)\*/g, "<em>$1</em>")               // *cursiva*
     .replace(/\n/g, "<br/>");                            // saltos de línea

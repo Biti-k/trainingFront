@@ -1,15 +1,24 @@
 ---
 export const prerender = false;
 
-const token = Astro.url.searchParams.get('token');
-if (token) {
-  Astro.cookies.set('session', token, {
-    httpOnly: true,
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30,
-    sameSite: 'lax',
-    secure: import.meta.env.PROD,
+const code = Astro.url.searchParams.get('code');
+if (code) {
+  const res = await fetch(`${import.meta.env.PUBLIC_API_BASE}/auth/exchange`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
   });
+
+  if (res.ok) {
+    const { token } = await res.json();
+    Astro.cookies.set('session', token, {
+      httpOnly: true,
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: 'lax',
+      secure: import.meta.env.PROD,
+    });
+  }
 }
 return Astro.redirect('/');
 ---
