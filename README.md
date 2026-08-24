@@ -1,5 +1,5 @@
 # Strength Trainer — Frontend
-
+Link of the app: https://b1train.vercel.app/
 A workout-tracking web app for logging strength training sessions, following progression over time, and getting AI-generated training feedback. Built with [Astro](https://astro.build) (server-rendered) and React islands for the interactive parts.
 
 This is the frontend half of the project. The API it talks to lives in a companion repo: [trainingBackend](https://github.com/Biti-k/trainingBackend) (FastAPI + PostgreSQL).
