@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../services/api';
+import { MUSCLE_REGIONS } from '../utils/muscles';
 
 export function ExerciseForm({
   onSuccess,
@@ -7,9 +8,13 @@ export function ExerciseForm({
   onSuccess?: () => void;
 }) {
   const [name, setName] = useState('');
-  const [muscleGroup, setMuscleGroup] = useState('');
+  const [muscles, setMuscles] = useState<string[]>([]);
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
+
+  function toggleMuscle(m: string) {
+    setMuscles((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -17,11 +22,11 @@ export function ExerciseForm({
     try {
       await api.exercises.create({
         name,
-        muscle_group: muscleGroup || undefined,
+        muscle_group: muscles.length ? muscles.join(', ') : undefined,
         description: description || undefined,
       });
       setName('');
-      setMuscleGroup('');
+      setMuscles([]);
       setDescription('');
       onSuccess?.();
     } catch (err: any) {
@@ -39,9 +44,28 @@ export function ExerciseForm({
             <label>Name *</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="e.g. Barbell Squat" />
           </div>
-          <div className="form-group">
-            <label>Muscle Group</label>
-            <input type="text" value={muscleGroup} onChange={(e) => setMuscleGroup(e.target.value)} placeholder="e.g. Legs, Chest, Back" />
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <label>Muscles worked {muscles.length > 0 && <span className="text-muted">· {muscles.join(', ')}</span>}</label>
+            <div className="muscle-picker">
+              {MUSCLE_REGIONS.map((region) => (
+                <div key={region.id} className="muscle-picker-row">
+                  <span className="muscle-picker-region">{region.label}</span>
+                  <div className="wz-chips">
+                    {region.muscles.map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        className={`wz-chip ${muscles.includes(m) ? 'wz-chip--active' : ''}`}
+                        aria-pressed={muscles.includes(m)}
+                        onClick={() => toggleMuscle(m)}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="form-group" style={{gridColumn: '1 / -1'}}>
             <label>Description</label>
